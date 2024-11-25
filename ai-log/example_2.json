@@ -1,0 +1,23 @@
+{
+    "answers": {
+        "phase": "architecture",
+        "action": "architectural decision",
+        "scope": "uml component",
+        "action experience": 4,
+        "language": "n/a",
+        "other language": "<fill in>",
+        "aimodel": "chatgpt",
+        "aimodel version": "GPT-4",
+        "open source aimodel": "<fill in>",
+        "tool option": "online full",
+        "experience with tool": 4,
+        "time allocated (h)": "6",
+        "time saved estimate (h)": "2",
+        "quality of ai help": 3,
+        "knowledge acquired": 4,
+        "generic feeling - now": 3,
+        "generic feeling - future": 4,
+        "threat level": 2,
+        "notes": "ChatGPT assisted in choosing appropriate architectural patterns."
+    }    
+}

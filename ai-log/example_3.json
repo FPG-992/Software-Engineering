@@ -1,0 +1,23 @@
+{
+    "answers": {
+        "phase": "coding",
+        "action": "source code authoring",
+        "scope": "backend",
+        "action experience": 3,
+        "language": "python",
+        "other language": "<fill in>",
+        "aimodel": "copilot",
+        "aimodel version": "1.10",
+        "open source aimodel": "<fill in>",
+        "tool option": "online full",
+        "experience with tool": 4,
+        "time allocated (h)": "5",
+        "time saved estimate (h)": "2",
+        "quality of ai help": 4,
+        "knowledge acquired": 3,
+        "generic feeling - now": 4,
+        "generic feeling - future": 5,
+        "threat level": 2,
+        "notes": "Copilot significantly accelerated coding by suggesting useful code snippets for backend development."
+    }    
+}
