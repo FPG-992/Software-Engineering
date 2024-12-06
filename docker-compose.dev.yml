@@ -1,0 +1,75 @@
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: ./front-end/Dockerfile.dev
+    ports: 
+      - 3000:3000
+    volumes:
+      - ./front-end:/usr/src/app:cached
+      - node_modules_frontend:/usr/src/app/node_modules
+    
+    entrypoint: ["bash", "-c"]
+
+    command: "npm run dev"
+        
+    env_file:
+      - .env
+        
+      
+
+    # develop:
+    #   watch:
+    #     - path: ./
+    #       action: rebuild
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: ./back-end/Dockerfile.dev
+    volumes:
+      - ./back-end:/usr/src/app:cached
+      - node_modules_backend:/usr/src/app/node_modules
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_SERVER=${POSTGRES_SERVER:-db}
+      - POSTGRES_USER=${POSTGRES_USER:-root}
+      - POSTGRES_DB=${POSTGRES_DB:-softeng24}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-root}
+    ports: 
+      - 3001:3001
+    depends_on:
+      - db
+    
+  
+  db:
+    container_name: db
+    image: postgres:17-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_SERVER=${POSTGRES_SERVER:-db}
+      - POSTGRES_USER=${POSTGRES_USER:-root}
+      - POSTGRES_DB=${POSTGRES_DB:-softeng24}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-root}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "root"]
+      interval: 5s
+      timeout: 30s
+      retries: 6
+      start_period: 10s
+
+    
+    
+volumes:
+  db_data:
+  node_modules_frontend:
+  node_modules_backend:

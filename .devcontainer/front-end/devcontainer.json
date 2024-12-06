@@ -1,0 +1,15 @@
+{
+    "dockerComposeFile": "../../docker-compose.dev.yml",
+    "service": "frontend",
+    "workspaceFolder": "/usr/src/app",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.inheritEnv": true
+            }
+        }
+    },
+    "shutdownAction": "stopCompose",
+    "overrideCommand": true
+}
