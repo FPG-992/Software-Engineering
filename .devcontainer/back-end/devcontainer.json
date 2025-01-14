@@ -18,7 +18,8 @@
                 "usernamehw.errorlens",
                 "mikestead.dotenv",
                 "mechatroner.rainbow-csv",
-                "cweijan.vscode-database-client2"
+                "cweijan.vscode-database-client2",
+                "Prisma.prisma"
             ]
         }
     },

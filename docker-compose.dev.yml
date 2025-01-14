@@ -39,8 +39,9 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-root}
       - POSTGRES_DB=${POSTGRES_DB:-softeng24}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-root}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_SERVER}/${POSTGRES_DB}
     ports: 
-      - 3001:3001
+      - 9115:9115
     depends_on:
       - db
     
