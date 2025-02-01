@@ -1,0 +1,23 @@
+
+
+
+services:
+  postgres:
+    image: postgres:alpine
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Variable not set}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Variable not set}
+      POSTGRES_DB: ${POSTGRES_DB:?Variable not set}
+    env_file:
+      - path: ../.env 
+        required: true # Make sure the file exists
+
+      # This overrides the previous ones if the same variable is defined.
+      # Create .env in this path if you want to override the global .env
+      # defined in the root of the project.
+      - path: ./.env 
+        required: false
+    

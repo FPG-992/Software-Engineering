@@ -1,19 +1,20 @@
 model TollStation {
-    TollID String @id
-    OpID String
-    Operator String
-    Name String
-    PM String
-    Locality String
-    Road String
-    Lat Decimal @db.Decimal(10, 8)
-    Long Decimal @db.Decimal(11, 8)
-    Email String
-    Price1 Decimal @db.Decimal(19, 2)
-    Price2 Decimal @db.Decimal(19, 2)
-    Price3 Decimal @db.Decimal(19, 2)
-    Price4 Decimal @db.Decimal(19, 2)
-    CreatedAt DateTime @default(now()) @db.Timestamp(0)
-    UpdatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
-    Pass Pass[]
-} 
+  TollID    String   @id
+  OpID      String
+  Operator  String
+  Name      String
+  PM        String
+  Locality  String
+  Road      String
+  Lat       Decimal  @db.Decimal(10, 8)
+  Long      Decimal  @db.Decimal(11, 8)
+  Email     String
+  Price1    Decimal  @db.Decimal(19, 2)
+  Price2    Decimal  @db.Decimal(19, 2)
+  Price3    Decimal  @db.Decimal(19, 2)
+  Price4    Decimal  @db.Decimal(19, 2)
+  CreatedAt DateTime @default(now()) @db.Timestamp(0)
+  UpdatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  
+  Pass      Pass[]
+}

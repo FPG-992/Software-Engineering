@@ -1,0 +1,36 @@
+-- CreateTable
+CREATE TABLE "Pass" (
+    "PassID" BIGSERIAL NOT NULL,
+    "TollId" TEXT NOT NULL,
+    "TagRef" TEXT NOT NULL,
+    "TagHomeID" TEXT NOT NULL,
+    "Charge" DECIMAL(19,2) NOT NULL,
+    "Timestamp" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Pass_pkey" PRIMARY KEY ("PassID")
+);
+
+-- CreateTable
+CREATE TABLE "TollStation" (
+    "TollID" TEXT NOT NULL,
+    "OpID" TEXT NOT NULL,
+    "Operator" TEXT NOT NULL,
+    "Name" TEXT NOT NULL,
+    "PM" TEXT NOT NULL,
+    "Locality" TEXT NOT NULL,
+    "Road" TEXT NOT NULL,
+    "Lat" DECIMAL(10,8) NOT NULL,
+    "Long" DECIMAL(11,8) NOT NULL,
+    "Email" TEXT NOT NULL,
+    "Price1" DECIMAL(19,2) NOT NULL,
+    "Price2" DECIMAL(19,2) NOT NULL,
+    "Price3" DECIMAL(19,2) NOT NULL,
+    "Price4" DECIMAL(19,2) NOT NULL,
+    "CreatedAt" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "TollStation_pkey" PRIMARY KEY ("TollID")
+);
+
+-- AddForeignKey
+ALTER TABLE "Pass" ADD CONSTRAINT "Pass_TollId_fkey" FOREIGN KEY ("TollId") REFERENCES "TollStation"("TollID") ON DELETE RESTRICT ON UPDATE CASCADE;
