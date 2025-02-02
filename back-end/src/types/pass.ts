@@ -1,3 +1,3 @@
-import { Pass } from "@prisma/client";
+import type { Pass } from "@prisma/client";
 
-export type PassRow = Omit<Pass, "PassID">;
+export type PassRow = Omit<Pass, "PassID" | "CreatedAt">;

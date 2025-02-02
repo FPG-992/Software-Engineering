@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 
-import adminRouter from "@src/controller/admin";
+import apiRouter from "@src/controller/api";
 import logger from "@utils/logger";
 
 import "express-async-errors"; // Import this before other routes
@@ -25,4 +25,4 @@ a JavaScript object and then attaches it to the body property of the request
 object before the route handler is called. */
 app.use(express.json());
 
-app.use("/admin", adminRouter);
+app.use("/api", apiRouter);

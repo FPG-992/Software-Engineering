@@ -1,0 +1,8 @@
+-- DropForeignKey
+ALTER TABLE "Pass" DROP CONSTRAINT "Pass_TollId_fkey";
+
+-- AlterTable
+ALTER TABLE "Pass" ADD COLUMN     "CreatedAt" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- AddForeignKey
+ALTER TABLE "Pass" ADD CONSTRAINT "Pass_TollId_fkey" FOREIGN KEY ("TollId") REFERENCES "TollStation"("TollID") ON DELETE CASCADE ON UPDATE CASCADE;

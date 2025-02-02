@@ -5,6 +5,7 @@ model Pass {
   TagHomeID   String
   Charge      Decimal     @db.Decimal(19, 2)
   Timestamp   DateTime    @default(now()) @db.Timestamp(0)
+  CreatedAt   DateTime    @default(now()) @db.Timestamp(0)
   
-  TollStation TollStation @relation(fields: [TollId], references: [TollID])
+  TollStation TollStation @relation(fields: [TollId], references: [TollID], onDelete: Cascade)
 }
