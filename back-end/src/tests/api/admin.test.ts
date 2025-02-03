@@ -35,13 +35,31 @@ describe("Testing admin controller", async () => {
 	// Toll stations must be set before passes can be added
 	// otherwise foreign key constraint will fail
 	await test("POST /api/admin/resetstations", async (t) => {
-		await t.test("Adding the toll stations to the database", async () => {
+		await t.test("Setting the toll stations when there are no records", async () => {
 			// Setting content type: multipart/form-data and mime type: 'text/csv'
 			const response = await api
 				.post("/api/admin/resetstations")
 				.set("Content-Type", "multipart/form-data")
 				.attach("file", tollStationsSamplePath, { contentType: "text/csv" })
 				.timeout(10000); // This is needed if the endpoint does not respond, to not hang
+
+			assert.strictEqual(response.status, 201);
+			assert.strictEqual(response.body?.status, "OK");
+			// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
+			assert.strictEqual(
+				await prisma.tollStation.count(),
+				await csvRowCount(tollStationsSamplePath),
+			);
+		});
+
+		// Since we added the toll stations in the previous test, when db was empty
+		//
+		await t.test("Resetting the toll stations when records exists", async () => {
+			// Setting content type: multipart/form-data and mime type: 'text/csv'
+			const response = await api
+				.post("/api/admin/resetstations")
+				.set("Content-Type", "multipart/form-data")
+				.attach("file", tollStationsSamplePath, { contentType: "text/csv" });
 
 			assert.strictEqual(response.status, 201);
 			assert.strictEqual(response.body?.status, "OK");
@@ -72,10 +90,72 @@ describe("Testing admin controller", async () => {
 
 			assert.strictEqual(response.status, 201);
 		});
+		await t.test("Adding does not remove existing passes", async () => {
+			const existingPassesCount = await prisma.pass.count();
+			const response = await api
+				.post("/api/admin/addpasses")
+				.set("Content-Type", "multipart/form-data")
+				.attach("file", passesSamplePath, { contentType: "text/csv" });
+			
+			assert.strictEqual(response.status, 201);
+			assert.strictEqual(response.body?.status, "OK");
+			assert.strictEqual(
+				await prisma.pass.count(),
+				await csvRowCount(passesSamplePath) + existingPassesCount,
+			);
+		})
 	});
+
+	await test("POST /api/admin/resetpasses", async (t) => {
+		await t.test("Resetting the passes when there are no records", async () => {
+			// Delete all records of passes
+			await prisma.pass.deleteMany();
+
+			// Setting content type: multipart/form-data and mime type: 'text/csv'
+			const response = await api
+				.post("/api/admin/resetpasses")
+				.set("Content-Type", "multipart/form-data")
+				.attach("file", passesSamplePath, { contentType: "text/csv" });
+
+			assert.strictEqual(response.status, 201);
+			assert.strictEqual(response.body?.status, "OK");
+
+			// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
+			assert.strictEqual(
+				await prisma.pass.count(),
+				await csvRowCount(passesSamplePath),
+			);
+		});
+
+		await t.test("Resetting the passes when records exist", async () => {
+			// Setting content type: multipart/form-data and mime type: 'text/csv'
+			const response = await api
+				.post("/api/admin/resetpasses")
+				.set("Content-Type", "multipart/form-data")
+				.attach("file", passesSamplePath, { contentType: "text/csv" });
+
+			assert.strictEqual(response.status, 201);
+			assert.strictEqual(response.body?.status, "OK");
+
+			// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
+			assert.strictEqual(
+				await prisma.pass.count(),
+				await csvRowCount(passesSamplePath),
+			);
+		});
+	})
 
 	await test("POST /api/admin/healthcheck", async (t) => {
 		await t.test("Checking the health of the database", async () => {
+			// Resetting the stations and passes
+			await api.post("/api/admin/resetstations")
+				.set("Content-Type", "multipart/form-data")
+				.attach("file", tollStationsSamplePath, { contentType: "text/csv" });
+			await api.post("/api/admin/resetpasses")
+				.set("Content-Type", "multipart/form-data")
+				.attach("file", passesSamplePath, { contentType: "text/csv" });
+
+			// Calling the healthcheck endpoint
 			const response = await api.get("/api/admin/healthcheck");
 
 			assert.strictEqual(response.status, 200);

@@ -65,6 +65,7 @@ adminRouter.post("/resetstations", upload.single("file"), async (req, res) => {
 		// This ensures that either all or none of the passes are added
 		await prisma.$transaction(
 			async (tx) => {
+				await tx.tollStation.deleteMany();
 				await tx.tollStation.createMany({
 					data: tollStations,
 				});
@@ -75,15 +76,52 @@ adminRouter.post("/resetstations", upload.single("file"), async (req, res) => {
 
 		res.status(201).json({ status: "OK" });
 	} catch (e) {
-		console.log(e);
 		res
 			.status(500)
 			.json({ status: "failed", reason: "Error adding toll stations" });
 	}
 });
 
-adminRouter.post("/resetpasses", async (req, res) => {
-	res.json();
+adminRouter.post("/resetpasses", upload.single("file"), async (req, res) => {
+	// The same code as in the /addpasses endpoint, the only difference is that
+	// the passes are deleted before adding the new ones
+	try {
+		const file = req.file;
+		if (!file) {
+			res.status(400).json({ status: "failed", reason: "No file uploaded" });
+			return;
+		}
+
+		if (file.mimetype !== "text/csv") {
+			res.status(400).json({
+				status: "failed",
+				reason: "Invalid file type. Only CSV files are allowed.",
+			});
+			return;
+		}
+
+		const fileStream = Readable.from(file.buffer);
+		const passes = await csvPassesStreamToJson(fileStream);
+
+		// Use Prisma transaction to add all passes in a single transaction
+		// This ensures that either all or none of the passes are added
+		await prisma.$transaction(
+			async (tx) => {
+				await tx.pass.deleteMany();
+				await tx.pass.createMany({
+					data: passes,
+				});
+			},
+			// https://www.prisma.io/docs/orm/prisma-client/queries/transactions#transaction-options
+			{ maxWait: 5000, timeout: 10000 },
+		);
+
+		res.status(201).json({ status: "OK" });
+	} catch (e) {
+		res
+			.status(500)
+			.json({ status: "failed", reason: "Error resetting passes" });
+	}
 });
 
 adminRouter.post("/addpasses", upload.single("file"), async (req, res) => {
