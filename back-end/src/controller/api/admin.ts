@@ -7,8 +7,9 @@ import {
 	csvPassesStreamToJson,
 	csvTollStationsStreamToJson,
 } from "@utils/csv_handlers";
-import { ReadStream } from "node:fs";
 import { Readable } from "node:stream";
+
+import { tagRefCount } from "@prisma/client/sql";
 
 const adminRouter = express.Router();
 // Because we are using memory storage, the file will be stored in memory and not on disk
@@ -18,14 +19,18 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 adminRouter.get("/healthcheck", async (_, res) => {
 	try {
-		// Logic to get the n_stations, n_tags and n_passes
+		const tagRefCountQueryResult = await prisma.$queryRawTyped(tagRefCount());
+
+		const n_stations = await prisma.tollStation.count();
+		const n_tags = Number(tagRefCountQueryResult.at(0)?.count ?? 0);
+		const n_passes = await prisma.pass.count();
 
 		res.json({
 			status: "OK",
 			dbconnection: config.DATABASE_URL,
-			n_stations: 10,
-			n_tags: 10,
-			n_passes: 10,
+			n_stations,
+			n_tags,
+			n_passes,
 		});
 	} catch {
 		res.status(401).json({

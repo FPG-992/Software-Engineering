@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { csvRowCount } from "@utils/csv_handlers";
 import api from "@src/tests/utils/api";
 import { config } from "dotenv";
+import { tagRefCount } from "@prisma/client/sql";
 
 config({ path: path.resolve(__dirname, "../../../.env.test") });
 
@@ -72,4 +73,21 @@ describe("Testing admin controller", async () => {
 			assert.strictEqual(response.status, 201);
 		});
 	});
+
+	await test("POST /api/admin/healthcheck", async (t) => {
+		await t.test("Checking the health of the database", async () => {
+			const response = await api.get("/api/admin/healthcheck");
+
+			assert.strictEqual(response.status, 200);
+			assert.strictEqual(response.body?.status, "OK");
+			assert(response.body?.dbconnection);
+
+			const expectedStationsCount = await csvRowCount(tollStationsSamplePath);
+			const expectedPassesCount = await csvRowCount(passesSamplePath);
+
+			assert(response.body?.n_tags);
+			assert.strictEqual(response.body?.n_stations, expectedStationsCount);
+			assert.strictEqual(response.body?.n_passes, expectedPassesCount);
+		})
+	})
 });

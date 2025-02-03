@@ -3,6 +3,7 @@ import cors from "cors";
 
 import "express-async-errors"; // Import this before other routes
 
+import apiRouter from "./controller/api";
 
 
 import config from "./utils/config";
@@ -20,6 +21,8 @@ app.use(
 a JavaScript object and then attaches it to the body property of the request
 object before the route handler is called. */
 app.use(express.json());
+
+app.use("/api", apiRouter);
 
 
 app.get("/", async (_req, res) => {
