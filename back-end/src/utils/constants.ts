@@ -1,3 +1,8 @@
+export const paramDateFormat = "yyyyMMdd";
+
+export const responseDateFormat = "yyyy-MM-dd HH:mm";
+
+
 export const passRowColumns = Object.freeze([
 	"timestamp",
 	"tollID",
@@ -22,3 +27,10 @@ export const tollStationRowColumns = Object.freeze([
 	"Price3",
 	"Price4"
 ])
+
+export default {
+	paramDateFormat,
+	responseDateFormat,
+	passRowColumns,
+	tollStationRowColumns,
+}
