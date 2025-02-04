@@ -50,7 +50,7 @@ tollStationPassesRouter.get(
 				periodFrom: format(dateFrom, responseDateFormat),
 				periodTo: format(dateTo, responseDateFormat),
 				nPasses: tollStationPassesResult.length,
-				passes: tollStationPassesResult,
+				passList: tollStationPassesResult,
 			});
 		} catch (e) {
 			if (
