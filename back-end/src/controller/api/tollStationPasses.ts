@@ -1,5 +1,5 @@
 import express from "express";
-import { parse, format, isValid } from "date-fns";
+import { parse, format, isValid, interval } from "date-fns";
 import multer from "multer";
 
 import config from "@utils/config";
@@ -20,6 +20,10 @@ tollStationPassesRouter.get(
 			// Parse the date_from and date_to parameters
 			const dateFrom = parse(date_from, paramDateFormat, new Date());
 			const dateTo = parse(date_to, paramDateFormat, new Date());
+            // The dateTo parameter is exclusive, so we need to add one day to it
+            // example: if dateFrom=20220101 and dateTo=20220102, the query will return
+            // all passes from "20220101 00:00:00" to "20220101 23:59:59" excluding "20220102 00:00:00"
+            dateTo.setDate(dateTo.getDate() + 1);
 
 			// If the date parameters are invalid, return a 400 response
 			if (!isValid(dateFrom) || !isValid(dateTo)) {
