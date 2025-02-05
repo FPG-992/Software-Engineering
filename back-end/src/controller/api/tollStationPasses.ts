@@ -20,9 +20,6 @@ tollStationPassesRouter.get(
 			// Parse the date_from and date_to parameters
 			const dateFrom = parse(date_from, paramDateFormat, new Date());
 			const dateTo = parse(date_to, paramDateFormat, new Date());
-            // Set the time to the end of the day for the dateTo parameter
-            // to include all passes on that day. The query's date range is inclusive.
-            dateTo.setHours(23, 59, 59, 999);
 
 			// If the date parameters are invalid, return a 400 response
 			if (!isValid(dateFrom) || !isValid(dateTo)) {
@@ -32,6 +29,10 @@ tollStationPassesRouter.get(
 				});
 				return;
 			}
+
+            // Set the time to the end of the day for the dateTo parameter
+            // to include all passes on that day. The query's date range is inclusive.
+            dateTo.setHours(23, 59, 59, 999);
 
 			// Get the toll station and its passes
 			// If the toll station does not exist, the query will throw an error
