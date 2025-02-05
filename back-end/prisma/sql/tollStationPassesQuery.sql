@@ -14,6 +14,6 @@ FROM "Pass"
     LEFT OUTER JOIN "TollStation" ts2 ON "Pass"."TagHomeID" = ts2."OpID"
 WHERE "Pass"."TollId" = $1
     AND "Pass"."Timestamp" >= $2
-    AND "Pass"."Timestamp" < $3
+    AND "Pass"."Timestamp" <= $3
 GROUP BY ("Pass"."PassID", ts2."Operator", ts1."OpID")
 ORDER BY "Pass"."Timestamp" ASC, "Pass"."PassID" ASC
