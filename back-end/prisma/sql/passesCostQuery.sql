@@ -15,7 +15,7 @@ SELECT
     "TollOpTollStations"."OpID" AS "tollOpID",
     "TagOpPasses"."TagHomeID" AS "tagOpID",
     COUNT(*)::int AS "nPasses",
-    COALESCE(SUM("TagOpPasses"."Charge"), 0) AS "passesCost"
+    COALESCE(SUM("TagOpPasses"."Charge"), 0::numeric(19,2)) AS "passesCost"
 FROM "TagOpPasses"
     INNER JOIN "TollOpTollStations" ON "TagOpPasses"."TollId" = "TollOpTollStations"."TollID"
 GROUP BY ("TollOpTollStations"."OpID", "TagOpPasses"."TagHomeID")
