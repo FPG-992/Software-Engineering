@@ -1,8 +1,5 @@
 import express from "express";
-import { parse, format, isValid, interval } from "date-fns";
-import multer from "multer";
-
-import config from "@utils/config";
+import { parse, format, isValid } from "date-fns";
 import prisma from "@src/database/prismaClient";
 
 import { passAnalysisQuery } from "@prisma/client/sql";

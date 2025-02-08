@@ -1,5 +1,5 @@
 import express from "express";
-import { parse, format, isValid, interval } from "date-fns";
+import { parse, format, isValid } from "date-fns";
 import prisma from "@src/database/prismaClient";
 
 import { chargesByQuery } from "@prisma/client/sql";
