@@ -41,60 +41,52 @@ const PassAnalysis: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Pass Analysis</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Station Operator (stationop)"
-          value={stationOp}
-          onChange={(e) => setStationOp(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Tag Operator (tagop)"
-          value={tagOp}
-          onChange={(e) => setTagOp(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="From (YYYYMMDD)"
-          value={from}
-          onChange={(e) => setFrom(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="To (YYYYMMDD)"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-          required
-        />
-        <button type="submit">Get Analysis</button>
-      </form>
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+    <div className="container">
+      <h1 className="page-header">Pass Analysis</h1>
+      <div className="card">
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Station Operator (stationop)"
+            value={stationOp}
+            onChange={(e) => setStationOp(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Tag Operator (tagop)"
+            value={tagOp}
+            onChange={(e) => setTagOp(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="From (YYYYMMDD)"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="To (YYYYMMDD)"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            required
+          />
+          <button type="submit">Get Analysis</button>
+        </form>
+        {error && <p className="error-message">Error: {error}</p>}
+      </div>
       {result && (
-        <div>
-          <h3>Analysis Result</h3>
-          <p>
-            <strong>Station Operator:</strong> {result.stationOpID}
-          </p>
-          <p>
-            <strong>Tag Operator:</strong> {result.tagOpID}
-          </p>
-          <p>
-            <strong>Request Time:</strong> {result.requestTimestamp}
-          </p>
-          <p>
-            <strong>Period:</strong> {result.periodFrom} to {result.periodTo}
-          </p>
-          <p>
-            <strong>Number of Passes:</strong> {result.nPasses}
-          </p>
+        <div className="card">
+          <h2>Analysis Result</h2>
+          <p><strong>Station Operator:</strong> {result.stationOpID}</p>
+          <p><strong>Tag Operator:</strong> {result.tagOpID}</p>
+          <p><strong>Request Time:</strong> {result.requestTimestamp}</p>
+          <p><strong>Period:</strong> {result.periodFrom} to {result.periodTo}</p>
+          <p><strong>Number of Passes:</strong> {result.nPasses}</p>
           {result.passList && result.passList.length > 0 ? (
-            <table border={1}>
+            <table>
               <thead>
                 <tr>
                   <th>ID</th>

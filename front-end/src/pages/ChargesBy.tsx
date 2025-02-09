@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { getChargesBy } from '../services/api';
 
 interface Charge {
-  // Adjust these fields based on the API response.
   operatorId: string;
   charge: number;
 }
@@ -37,47 +36,47 @@ const ChargesBy: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Charges By Operator</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Operator ID (opid)"
-          value={opid}
-          onChange={(e) => setOpid(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="From (YYYYMMDD)"
-          value={from}
-          onChange={(e) => setFrom(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="To (YYYYMMDD)"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-          required
-        />
-        <button type="submit">Get Charges</button>
-      </form>
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+    <div className="container">
+      <h1 className="page-header">Υπολογισμός Οικονομικών Συμψηφισμών</h1>
+      <div className="card">
+        <p>
+          Εισάγετε τη χρονική περίοδο και τον λειτουργό για τον οποίο θέλετε να υπολογίσετε τις οικονομικές
+          οφειλές.
+        </p>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Operator ID (opid)"
+            value={opid}
+            onChange={(e) => setOpid(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="From (YYYYMMDD)"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="To (YYYYMMDD)"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            required
+          />
+          <button type="submit">Calculate Settlements</button>
+        </form>
+        {error && <p className="error-message">Error: {error}</p>}
+      </div>
       {result && (
-        <div>
-          <h3>Charges Result</h3>
-          <p>
-            <strong>Operator ID:</strong> {result.tollOpID}
-          </p>
-          <p>
-            <strong>Request Time:</strong> {result.requestTimestamp}
-          </p>
-          <p>
-            <strong>Period:</strong> {result.periodFrom} to {result.periodTo}
-          </p>
+        <div className="card">
+          <h2>Settlement Results</h2>
+          <p><strong>Operator ID:</strong> {result.tollOpID}</p>
+          <p><strong>Request Time:</strong> {result.requestTimestamp}</p>
+          <p><strong>Period:</strong> {result.periodFrom} to {result.periodTo}</p>
           {result.vOpList && result.vOpList.length > 0 ? (
-            <table border={1}>
+            <table>
               <thead>
                 <tr>
                   <th>Operator</th>
@@ -94,7 +93,7 @@ const ChargesBy: React.FC = () => {
               </tbody>
             </table>
           ) : (
-            <p>No charge data found.</p>
+            <p>No settlement data found.</p>
           )}
         </div>
       )}

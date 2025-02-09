@@ -30,12 +30,11 @@ const Admin: React.FC = () => {
         response = await resetStations(file);
       }
       
-      // Check if response is defined before using it
       if (!response) {
         setError('No response received from the server.');
         return;
       }
-
+      
       setResult(JSON.stringify(response.data, null, 2));
       setError('');
     } catch (err: any) {
@@ -44,32 +43,46 @@ const Admin: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Admin - CSV Upload</h1>
-      <form onSubmit={handleUpload}>
-        <label>
-          Select Action:
-          <select
-            value={uploadType}
-            onChange={(e) => setUploadType(e.target.value as UploadType)}
-          >
-            <option value="addpasses">Add Passes</option>
-            <option value="resetpasses">Reset Passes</option>
-            <option value="resetstations">Reset Stations</option>
-          </select>
-        </label>
-        <br />
-        <label>
-          Select CSV File:
-          <input type="file" accept=".csv" onChange={handleFileChange} required />
-        </label>
-        <br />
-        <button type="submit">Upload</button>
-      </form>
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+    <div className="container">
+      <h1 className="page-header">Συλλογή και Αποθήκευση Δεδομένων Διελεύσεων</h1>
+      <div className="card">
+        <p>
+          <strong>Βήμα 1:</strong> Το σύστημα του λειτουργού αποστέλλει τα δεδομένα διελεύσεων μέσω REST API.
+        </p>
+        <p>
+          <strong>Βήμα 2:</strong> Το σύστημα επαληθεύει την εγκυρότητα των δεδομένων.
+        </p>
+        <p>
+          <strong>Βήμα 3:</strong> Τα δεδομένα αποθηκεύονται στη βάση δεδομένων.
+        </p>
+        <p>
+          <strong>Βήμα 4:</strong> Επιστρέφεται επιβεβαίωση στον λειτουργό.
+        </p>
+        <form onSubmit={handleUpload}>
+          <label>
+            Επιλέξτε Ενέργεια:
+            <select
+              value={uploadType}
+              onChange={(e) => setUploadType(e.target.value as UploadType)}
+            >
+              <option value="addpasses">Προσθήκη Δεδομένων (addpasses)</option>
+              <option value="resetpasses">Επαναφορά Δεδομένων διελεύσεων (resetpasses)</option>
+              <option value="resetstations">Επαναφορά Σταθμών (resetstations)</option>
+            </select>
+          </label>
+          <br />
+          <label>
+            Επιλέξτε αρχείο CSV:
+            <input type="file" accept=".csv" onChange={handleFileChange} required />
+          </label>
+          <br />
+          <button type="submit">Αποστολή</button>
+        </form>
+        {error && <p className="error-message">Error: {error}</p>}
+      </div>
       {result && (
-        <div>
-          <h3>Response:</h3>
+        <div className="card">
+          <h3>Απάντηση από το σύστημα:</h3>
           <pre>{result}</pre>
         </div>
       )}

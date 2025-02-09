@@ -20,36 +20,40 @@ const HealthCheck: React.FC = () => {
       .catch((err) => setError(err.message));
   }, []);
 
-  if (error) return <p>Error: {error}</p>;
-  if (!data) return <p>Loading...</p>;
-
   return (
-    <div>
-      <h1>Health Check</h1>
-      <table>
-        <tbody>
-          <tr>
-            <td>Status:</td>
-            <td>{data.status}</td>
-          </tr>
-          <tr>
-            <td>DB Connection:</td>
-            <td>{data.dbconnection}</td>
-          </tr>
-          <tr>
-            <td># Stations:</td>
-            <td>{data.n_stations}</td>
-          </tr>
-          <tr>
-            <td># Tags:</td>
-            <td>{data.n_tags}</td>
-          </tr>
-          <tr>
-            <td># Passes:</td>
-            <td>{data.n_passes}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="container">
+      <h1 className="page-header">System Health Check</h1>
+      {error && <p className="error-message">{error}</p>}
+      {data ? (
+        <div className="card">
+          <table>
+            <tbody>
+              <tr>
+                <th>Status</th>
+                <td>{data.status}</td>
+              </tr>
+              <tr>
+                <th>DB Connection</th>
+                <td>{data.dbconnection}</td>
+              </tr>
+              <tr>
+                <th># Stations</th>
+                <td>{data.n_stations}</td>
+              </tr>
+              <tr>
+                <th># Tags</th>
+                <td>{data.n_tags}</td>
+              </tr>
+              <tr>
+                <th># Passes</th>
+                <td>{data.n_passes}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 };

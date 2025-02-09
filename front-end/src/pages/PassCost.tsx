@@ -34,61 +34,51 @@ const PassCost: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Pass Cost Calculation</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Toll Operator (tollOpID)"
-          value={tollOpID}
-          onChange={(e) => setTollOpID(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Tag Operator (tagOpID)"
-          value={tagOpID}
-          onChange={(e) => setTagOpID(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="From (YYYYMMDD)"
-          value={from}
-          onChange={(e) => setFrom(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="To (YYYYMMDD)"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-          required
-        />
-        <button type="submit">Calculate Cost</button>
-      </form>
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+    <div className="container">
+      <h1 className="page-header">Pass Cost Calculation</h1>
+      <div className="card">
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Toll Operator (tollOpID)"
+            value={tollOpID}
+            onChange={(e) => setTollOpID(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Tag Operator (tagOpID)"
+            value={tagOpID}
+            onChange={(e) => setTagOpID(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="From (YYYYMMDD)"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="To (YYYYMMDD)"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            required
+          />
+          <button type="submit">Calculate Cost</button>
+        </form>
+        {error && <p className="error-message">Error: {error}</p>}
+      </div>
       {result && (
-        <div>
-          <h3>Pass Cost Result</h3>
-          <p>
-            <strong>Toll Operator:</strong> {result.tollOpID}
-          </p>
-          <p>
-            <strong>Tag Operator:</strong> {result.tagOpID}
-          </p>
-          <p>
-            <strong>Request Time:</strong> {result.requestTimestamp}
-          </p>
-          <p>
-            <strong>Period:</strong> {result.periodFrom} to {result.periodTo}
-          </p>
-          <p>
-            <strong>Number of Passes:</strong> {result.nPasses}
-          </p>
-          <p>
-            <strong>Total Cost:</strong> {result.passesCost}
-          </p>
+        <div className="card">
+          <h2>Pass Cost Result</h2>
+          <p><strong>Toll Operator:</strong> {result.tollOpID}</p>
+          <p><strong>Tag Operator:</strong> {result.tagOpID}</p>
+          <p><strong>Request Time:</strong> {result.requestTimestamp}</p>
+          <p><strong>Period:</strong> {result.periodFrom} to {result.periodTo}</p>
+          <p><strong>Number of Passes:</strong> {result.nPasses}</p>
+          <p><strong>Total Cost:</strong> {result.passesCost}</p>
         </div>
       )}
     </div>

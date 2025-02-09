@@ -45,11 +45,25 @@
     color: var(--navbar-text-color);
     padding: 1rem;
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-between;
   }
   
-  nav a {
+  .nav-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 2rem;
+    padding-left: 1rem;
+  }
+  
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .nav-links a {
     color: var(--navbar-text-color);
     text-decoration: none;
     margin: 0.5rem 1rem;
@@ -57,24 +71,40 @@
     transition: color 0.3s ease;
   }
   
-  nav a:hover {
+  .nav-links a:hover {
     color: var(--navbar-hover-color);
   }
   
   /* ================================================
-     Container
+     Container & Cards
      ================================================ */
   .container {
     max-width: 1200px;
     margin: 2rem auto;
-    padding: 1rem;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .page-header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--dark-color);
+  }
+  
+  .card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
   
   /* ================================================
-     Forms
+     Forms & Buttons
      ================================================ */
   form {
     display: flex;
@@ -129,18 +159,36 @@
   }
   
   /* ================================================
+     Error Messages
+     ================================================ */
+  .error-message {
+    color: var(--danger-color);
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  /* ================================================
      Responsive Adjustments
      ================================================ */
   @media (max-width: 768px) {
+    .page-header {
+      font-size: 2rem;
+    }
+    
     nav {
       flex-direction: column;
       align-items: center;
     }
-  
+    
+    .nav-title {
+      margin-bottom: 1rem;
+    }
+    
     form {
       flex-direction: column;
     }
-  
+    
     table {
       font-size: 0.9rem;
     }
