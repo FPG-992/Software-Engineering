@@ -74,11 +74,11 @@ adminRouter.post("/resetstations", upload.single("file"), async (req, res) => {
 			{ maxWait: 5000, timeout: 10000 },
 		);
 
-		res.status(201).json({ status: "OK" });
+		res.status(200).json({ status: "OK" });
 	} catch (e) {
 		res
 			.status(500)
-			.json({ status: "failed", reason: "Error adding toll stations" });
+			.json({ status: "failed", info: "Error adding toll stations" });
 	}
 });
 
@@ -116,11 +116,11 @@ adminRouter.post("/resetpasses", upload.single("file"), async (req, res) => {
 			{ maxWait: 5000, timeout: 10000 },
 		);
 
-		res.status(201).json({ status: "OK" });
+		res.status(200).json({ status: "OK" });
 	} catch (e) {
 		res
 			.status(500)
-			.json({ status: "failed", reason: "Error resetting passes" });
+			.json({ status: "failed", info: "Error resetting passes" });
 	}
 });
 
@@ -128,14 +128,14 @@ adminRouter.post("/addpasses", upload.single("file"), async (req, res) => {
 	try {
 		const file = req.file;
 		if (!file) {
-			res.status(400).json({ status: "failed", reason: "No file uploaded" });
+			res.status(400).json({ status: "failed", info: "No file uploaded" });
 			return;
 		}
 
 		if (file.mimetype !== "text/csv") {
 			res.status(400).json({
 				status: "failed",
-				reason: "Invalid file type. Only CSV files are allowed.",
+				info: "Invalid file type. Only CSV files are allowed.",
 			});
 			return;
 		}
@@ -155,9 +155,9 @@ adminRouter.post("/addpasses", upload.single("file"), async (req, res) => {
 			{ maxWait: 5000, timeout: 10000 },
 		);
 
-		res.status(201).json({ status: "OK" });
+		res.status(200).json({ status: "OK" });
 	} catch (e) {
-		res.status(500).json({ status: "failed", reason: "Error adding passes" });
+		res.status(500).json({ status: "failed", info: "Error adding passes" });
 	}
 });
 

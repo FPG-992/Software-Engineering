@@ -35,7 +35,7 @@ passAnalysisRouter.get(
 			// and if the previous query fails, the subsequent queries are not executed
 			// and the transaction is rolled back.
 			// The first two queries check if the stationOpID and tagOpID exist,
-            // and if they do not exist, an error is thrown.
+			// and if they do not exist, an error is thrown.
 			// The underscore prefix is used to indicate that the variables are not used.
 			const [_stationOpIDExists, _tagOpIDExists, passAnalysisResult] =
 				await prisma.$transaction([
@@ -70,9 +70,14 @@ passAnalysisRouter.get(
 				e instanceof Prisma.PrismaClientKnownRequestError &&
 				e.code === "P2025"
 			) {
-				res.status(404).json({
+				res.status(500).json({
 					status: "failed",
 					reason: "stationOpID or tagOpID not found",
+				});
+			} else {
+				res.status(500).send({
+					status: "failed",
+					reason: "Unknown internal server error",
 				});
 			}
 		}
