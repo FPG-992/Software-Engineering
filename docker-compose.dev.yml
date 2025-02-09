@@ -29,40 +29,59 @@ services:
     build:
       context: .
       dockerfile: ./back-end/Dockerfile.dev
+    command: |
+      `
+      npm install
+      npx prisma migrate deploy
+      npx prisma generate --sql
+      npm run dev
+      `
     volumes:
       - ./back-end:/usr/src/app:cached
       - node_modules_backend:/usr/src/app/node_modules
     env_file:
-      - .env
+      - path: .env.dev
+        required: false
     environment:
-      - POSTGRES_SERVER=${POSTGRES_SERVER:-db}
+      - BACKEND_PORT=${BACKEND_PORT:-9115}
       - POSTGRES_USER=${POSTGRES_USER:-root}
       - POSTGRES_DB=${POSTGRES_DB:-softeng24}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-root}
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_SERVER}/${POSTGRES_DB}
+      # The hostname "postgres" is the name of the service inside docker compose
+      # and that should be used to connect to database, therefore in the url there
+      # is "postgres" where HOST parameter is expected.
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
     ports: 
-      - 9115:9115
+      # Default has to be specified here too because environment does
+      # does not seem to load it before it tries to expose the port
+      - ${BACKEND_PORT:-9115}:${BACKEND_PORT:-9115}
     depends_on:
-      - db
+      postgres:
+        # If the healthcheck fails we will get an error similar to
+        # "dependency failed to start: container postgres is unhealthy"
+        condition: service_healthy
+        
     
   
-  db:
-    container_name: db
+  postgres:
+    container_name: postgres
     image: postgres:17-alpine
     ports:
-      - 5432:5432
+      - ${POSTGRES_PORT:-5432}:5432
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env
+      - path: .env.dev
+        required: false
     environment:
-      - POSTGRES_SERVER=${POSTGRES_SERVER:-db}
       - POSTGRES_USER=${POSTGRES_USER:-root}
       - POSTGRES_DB=${POSTGRES_DB:-softeng24}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-root}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "root"]
+      # ["CMD", "pg_isready", "-U", "root"] was not working
+      # nor ["CMD-SHELL", "pg_isready -U root"]
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 30s
       retries: 6
@@ -71,6 +90,6 @@ services:
     
     
 volumes:
-  db_data:
+  postgres_data:
   node_modules_frontend:
   node_modules_backend:
