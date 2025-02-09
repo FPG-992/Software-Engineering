@@ -56,11 +56,11 @@ passesCostRouter.get(
 					),
 				]);
 
-            // "nPasses" and "passesCost" will never be null or undefined
-            // because if the transaction gets to that point to execute
-            // the third query, it means that the stationOpID and tagOpID exist.
-            // And also "passesCharge" is coalesced to 0 in the SQL query.
-            // and in "nPasses", "COUNT" always returns a number. 
+			// "nPasses" and "passesCost" will never be null or undefined
+			// because if the transaction gets to that point to execute
+			// the third query, it means that the stationOpID and tagOpID exist.
+			// And also "passesCharge" is coalesced to 0 in the SQL query.
+			// and in "nPasses", "COUNT" always returns a number.
 			res.json({
 				tollOpID,
 				tagOpID,
@@ -75,9 +75,14 @@ passesCostRouter.get(
 				e instanceof Prisma.PrismaClientKnownRequestError &&
 				e.code === "P2025"
 			) {
-				res.status(404).json({
+				res.status(500).json({
 					status: "failed",
 					reason: "tollOpID or tagOpID not found",
+				});
+			} else {
+				res.status(500).send({
+					status: "failed",
+					reason: "Unknown internal server error",
 				});
 			}
 		}

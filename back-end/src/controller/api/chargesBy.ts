@@ -50,16 +50,21 @@ chargesByRouter.get("/:tollOpID/:date_from/:date_to", async (req, res) => {
 			requestTimestamp: format(new Date(Date.now()), responseDateFormat),
 			periodFrom: format(dateFrom, responseDateFormat),
 			periodTo: format(dateTo, responseDateFormat),
-			vOpList: chargesByResult
+			vOpList: chargesByResult,
 		});
 	} catch (e) {
 		if (
 			e instanceof Prisma.PrismaClientKnownRequestError &&
 			e.code === "P2025"
 		) {
-			res.status(404).json({
+			res.status(500).json({
 				status: "failed",
 				reason: "tollOpID or tagOpID not found",
+			});
+		} else {
+			res.status(500).send({
+				status: "failed",
+				reason: "Unknown internal server error",
 			});
 		}
 	}
