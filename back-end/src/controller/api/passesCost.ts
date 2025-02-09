@@ -5,6 +5,7 @@ import prisma from "@src/database/prismaClient";
 import { passesCostQuery } from "@prisma/client/sql";
 import { paramDateFormat, responseDateFormat } from "@utils/constants";
 import { Prisma } from "@prisma/client";
+import { json2csv } from "json-2-csv";
 
 const passesCostRouter = express.Router();
 
@@ -13,6 +14,7 @@ passesCostRouter.get(
 	async (req, res) => {
 		try {
 			const { tollOpID, tagOpID, date_from, date_to } = req.params;
+			const { outputFormat } = req.query;
 
 			// Parse the date_from and date_to parameters
 			const dateFrom = parse(date_from, paramDateFormat, new Date());
@@ -61,7 +63,7 @@ passesCostRouter.get(
 			// the third query, it means that the stationOpID and tagOpID exist.
 			// And also "passesCharge" is coalesced to 0 in the SQL query.
 			// and in "nPasses", "COUNT" always returns a number.
-			res.json({
+			const resBody = {
 				tollOpID,
 				tagOpID,
 				requestTimestamp: format(new Date(Date.now()), responseDateFormat),
@@ -69,7 +71,14 @@ passesCostRouter.get(
 				periodTo: format(dateTo, responseDateFormat),
 				nPasses,
 				passesCost,
-			});
+			};
+			if (outputFormat) {
+				res
+					.setHeader("Content-Type", "text/csv; charset=utf-8")
+					.send(json2csv([resBody]));
+			} else {
+				res.json(resBody);
+			}
 		} catch (e) {
 			if (
 				e instanceof Prisma.PrismaClientKnownRequestError &&

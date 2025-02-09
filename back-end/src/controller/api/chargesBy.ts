@@ -5,12 +5,14 @@ import prisma from "@src/database/prismaClient";
 import { chargesByQuery } from "@prisma/client/sql";
 import { paramDateFormat, responseDateFormat } from "@utils/constants";
 import { Prisma } from "@prisma/client";
+import { json2csv } from "json-2-csv";
 
 const chargesByRouter = express.Router();
 
 chargesByRouter.get("/:tollOpID/:date_from/:date_to", async (req, res) => {
 	try {
 		const { tollOpID, date_from, date_to } = req.params;
+		const { outputFormat } = req.query;
 
 		// Parse the date_from and date_to parameters
 		const dateFrom = parse(date_from, paramDateFormat, new Date());
@@ -45,13 +47,21 @@ chargesByRouter.get("/:tollOpID/:date_from/:date_to", async (req, res) => {
 			prisma.$queryRawTyped(chargesByQuery(tollOpID, dateFrom, dateTo)),
 		]);
 
-		res.json({
+		const resBody = {
 			tollOpID,
 			requestTimestamp: format(new Date(Date.now()), responseDateFormat),
 			periodFrom: format(dateFrom, responseDateFormat),
 			periodTo: format(dateTo, responseDateFormat),
 			vOpList: chargesByResult,
-		});
+		};
+
+		if (outputFormat === "csv") {
+			res
+				.setHeader("Content-Type", "text/csv; charset=utf-8")
+				.send(json2csv([resBody]));
+		} else {
+			res.json(resBody);
+		}
 	} catch (e) {
 		if (
 			e instanceof Prisma.PrismaClientKnownRequestError &&

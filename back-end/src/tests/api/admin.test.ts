@@ -45,7 +45,8 @@ describe("Testing admin controller", async () => {
 					.attach("file", tollStationsSamplePath, { contentType: "text/csv" })
 					.timeout(10000); // This is needed if the endpoint does not respond, to not hang
 
-				assert.strictEqual(response.status, 204);
+				assert.strictEqual(response.status, 200);
+				assert.strictEqual(response.body?.status, "OK");
 				// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
 				assert.strictEqual(
 					await prisma.tollStation.count(),
@@ -65,7 +66,8 @@ describe("Testing admin controller", async () => {
 					.set("Content-Type", "multipart/form-data")
 					.attach("file", tollStationsSamplePath, { contentType: "text/csv" });
 
-				assert.strictEqual(response.status, 204);
+				assert.strictEqual(response.status, 200);
+				assert.strictEqual(response.body?.status, "OK");
 				// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
 				assert.strictEqual(
 					await prisma.tollStation.count(),
@@ -83,7 +85,7 @@ describe("Testing admin controller", async () => {
 				.set("Content-Type", "multipart/form-data")
 				.attach("file", passesSamplePath, { contentType: "text/csv" });
 
-			assert.strictEqual(response.status, 204);
+			assert.strictEqual(response.status, 200);
 			// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
 			assert.strictEqual(
 				await prisma.pass.count(),
@@ -97,7 +99,8 @@ describe("Testing admin controller", async () => {
 				.set("Content-Type", "multipart/form-data")
 				.attach("file", passesSamplePath, { contentType: "text/csv" });
 
-			assert.strictEqual(response.status, 204);
+			assert.strictEqual(response.status, 200);
+			assert.strictEqual(response.body?.status, "OK");
 			assert.strictEqual(
 				await prisma.pass.count(),
 				(await csvRowCount(passesSamplePath)) + existingPassesCount,
@@ -116,7 +119,8 @@ describe("Testing admin controller", async () => {
 				.set("Content-Type", "multipart/form-data")
 				.attach("file", passesSamplePath, { contentType: "text/csv" });
 
-			assert.strictEqual(response.status, 204);
+			assert.strictEqual(response.status, 200);
+			assert.strictEqual(response.body?.status, "OK");
 
 			// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
 			assert.strictEqual(
@@ -132,7 +136,8 @@ describe("Testing admin controller", async () => {
 				.set("Content-Type", "multipart/form-data")
 				.attach("file", passesSamplePath, { contentType: "text/csv" });
 
-			assert.strictEqual(response.status, 204);
+			assert.strictEqual(response.status, 200);
+			assert.strictEqual(response.body?.status, "OK");
 
 			// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
 			assert.strictEqual(

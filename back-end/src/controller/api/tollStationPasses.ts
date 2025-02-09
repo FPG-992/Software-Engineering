@@ -2,6 +2,8 @@ import express from "express";
 import { parse, format, isValid } from "date-fns";
 import prisma from "@src/database/prismaClient";
 
+import { json2csv } from "json-2-csv";
+
 import { tollStationPassesQuery } from "@prisma/client/sql";
 import { paramDateFormat, responseDateFormat } from "@utils/constants";
 import { Prisma } from "@prisma/client";
@@ -13,6 +15,7 @@ tollStationPassesRouter.get(
 	async (req, res) => {
 		try {
 			const { tollStationID, date_from, date_to } = req.params;
+			const { outputFormat } = req.query;
 
 			// Parse the date_from and date_to parameters
 			const dateFrom = parse(date_from, paramDateFormat, new Date());
@@ -44,7 +47,7 @@ tollStationPassesRouter.get(
 				]);
 
 			// Return the toll station and its passes
-			res.status(200).json({
+			const resBody = {
 				stationID: tollStationResult.TollID,
 				stationOperator: tollStationResult.Operator,
 				requestTimestamp: format(new Date(Date.now()), responseDateFormat),
@@ -52,7 +55,14 @@ tollStationPassesRouter.get(
 				periodTo: format(dateTo, responseDateFormat),
 				nPasses: tollStationPassesResult.length,
 				passList: tollStationPassesResult,
-			});
+			};
+			if (outputFormat === "csv") {
+				res
+					.setHeader("Content-Type", "text/csv; charset=utf-8")
+					.send(json2csv([resBody]));
+			} else {
+				res.status(200).json(resBody);
+			}
 		} catch (e) {
 			if (
 				e instanceof Prisma.PrismaClientKnownRequestError &&
