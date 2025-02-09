@@ -1,35 +1,30 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import NavBar from './components/NavBar.tsx';
+import HealthCheck from './pages/HealthCheck';
+import TollStationPasses from './pages/TollStationPasses';
+import PassAnalysis from './pages/PassAnalysis';
+import PassCost from './pages/PassCost';
+import ChargesBy from './pages/ChargesBy.tsx';
+import Admin from './pages/Admin';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App: React.FC = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <NavBar />
+      <div style={{ padding: '1rem' }}>
+        <Routes>
+          <Route path="/" element={<HealthCheck />} />
+          <Route path="/tollstationpasses" element={<TollStationPasses />} />
+          <Route path="/passanalysis" element={<PassAnalysis />} />
+          <Route path="/passescost" element={<PassCost />} />
+          <Route path="/chargesby" element={<ChargesBy />} />
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
       </div>
-      <h1>React + Vite</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </Router>
+  );
+};
 
-export default App
+export default App;
