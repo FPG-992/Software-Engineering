@@ -27,9 +27,9 @@ tollStationPassesRouter.get(
 				return;
 			}
 
-            // Set the time to the end of the day for the dateTo parameter
-            // to include all passes on that day. The query's date range is inclusive.
-            dateTo.setHours(23, 59, 59, 999);
+			// Set the time to the end of the day for the dateTo parameter
+			// to include all passes on that day. The query's date range is inclusive.
+			dateTo.setHours(23, 59, 59, 999);
 
 			// Get the toll station and its passes
 			// If the toll station does not exist, the query will throw an error
@@ -62,12 +62,12 @@ tollStationPassesRouter.get(
 					status: "failed",
 					reason: "Toll station not found",
 				});
-				return;
+			} else {
+				res.status(500).json({
+					status: "failed",
+					reason: "Unknown internal server error",
+				});
 			}
-			res.status(500).json({
-				status: "failed",
-				reason: "Error getting toll station passes",
-			});
 		}
 	},
 );

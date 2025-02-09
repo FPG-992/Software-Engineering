@@ -74,7 +74,7 @@ adminRouter.post("/resetstations", upload.single("file"), async (req, res) => {
 			{ maxWait: 5000, timeout: 10000 },
 		);
 
-		res.status(201).json({ status: "OK" });
+		res.status(204).send();
 	} catch (e) {
 		res
 			.status(500)
@@ -116,7 +116,7 @@ adminRouter.post("/resetpasses", upload.single("file"), async (req, res) => {
 			{ maxWait: 5000, timeout: 10000 },
 		);
 
-		res.status(201).json({ status: "OK" });
+		res.status(204).send();
 	} catch (e) {
 		res
 			.status(500)
@@ -155,7 +155,7 @@ adminRouter.post("/addpasses", upload.single("file"), async (req, res) => {
 			{ maxWait: 5000, timeout: 10000 },
 		);
 
-		res.status(201).json({ status: "OK" });
+		res.status(204).send();
 	} catch (e) {
 		res.status(500).json({ status: "failed", reason: "Error adding passes" });
 	}
