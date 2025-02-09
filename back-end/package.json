@@ -7,7 +7,7 @@
     "dev": "npm run ts-node ./src/index.ts",
     "tsc": "tsc",
     "ts-node": "node --env-file-if-exists=.env -r ts-node/register -r tsconfig-paths/register",
-    "test": "env-cmd -f .env.test npx prisma db push --force-reset && node -r ts-node/register -r tsconfig-paths/register --test **/*.test.ts"
+    "test": "env-cmd -f .env.test npx prisma db push --force-reset && node --env-file-if-exists=.env.test -r ts-node/register -r tsconfig-paths/register --test **/*.test.ts"
   },
   "keywords": [],
   "author": "",
