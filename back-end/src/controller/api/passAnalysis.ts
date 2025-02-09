@@ -14,7 +14,7 @@ passAnalysisRouter.get(
 	async (req, res) => {
 		try {
 			const { stationOpID, tagOpID, date_from, date_to } = req.params;
-			const { outputFormat } = req.query;
+			const outputFormat = req.query.format;
 
 			// Parse the date_from and date_to parameters
 			const dateFrom = parse(date_from, paramDateFormat, new Date());
@@ -65,13 +65,26 @@ passAnalysisRouter.get(
 				periodFrom: format(dateFrom, responseDateFormat),
 				periodTo: format(dateTo, responseDateFormat),
 				nPasses: passAnalysisResult.length,
-				passList: passAnalysisResult,
+				passList: passAnalysisResult.map((v) => ({
+					...v,
+					timestamp: format(v.timestamp, responseDateFormat),
+				})),
 			};
 
 			if (outputFormat === "csv") {
-				res
-					.setHeader("Content-Type", "text/csv; charset=utf-8")
-					.send(json2csv([resBody]));
+				res.setHeader("Content-Type", "text/csv; charset=utf-8").send(
+					json2csv(
+						passAnalysisResult.map((v) => ({
+							...resBody,
+							passList: {
+								...v,
+								timestamp: format(v.timestamp, responseDateFormat),
+								passCharge: v.passCharge?.toString(),
+							},
+						})),
+						{ expandNestedObjects: true },
+					),
+				);
 			} else {
 				res.json(resBody);
 			}

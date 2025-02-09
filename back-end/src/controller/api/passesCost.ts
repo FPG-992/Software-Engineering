@@ -14,7 +14,7 @@ passesCostRouter.get(
 	async (req, res) => {
 		try {
 			const { tollOpID, tagOpID, date_from, date_to } = req.params;
-			const { outputFormat } = req.query;
+			const outputFormat = req.query.format;
 
 			// Parse the date_from and date_to parameters
 			const dateFrom = parse(date_from, paramDateFormat, new Date());
@@ -70,12 +70,12 @@ passesCostRouter.get(
 				periodFrom: format(dateFrom, responseDateFormat),
 				periodTo: format(dateTo, responseDateFormat),
 				nPasses,
-				passesCost,
+				passesCost: passesCost?.toString(), // json2csv does not stringify Prisma.Decimal
 			};
-			if (outputFormat) {
+			if (outputFormat === "csv") {
 				res
 					.setHeader("Content-Type", "text/csv; charset=utf-8")
-					.send(json2csv([resBody]));
+					.send(json2csv([resBody], { expandNestedObjects: true }));
 			} else {
 				res.json(resBody);
 			}

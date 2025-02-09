@@ -12,7 +12,7 @@ const chargesByRouter = express.Router();
 chargesByRouter.get("/:tollOpID/:date_from/:date_to", async (req, res) => {
 	try {
 		const { tollOpID, date_from, date_to } = req.params;
-		const { outputFormat } = req.query;
+		const outputFormat = req.query.format;
 
 		// Parse the date_from and date_to parameters
 		const dateFrom = parse(date_from, paramDateFormat, new Date());
@@ -56,9 +56,23 @@ chargesByRouter.get("/:tollOpID/:date_from/:date_to", async (req, res) => {
 		};
 
 		if (outputFormat === "csv") {
-			res
-				.setHeader("Content-Type", "text/csv; charset=utf-8")
-				.send(json2csv([resBody]));
+			res.setHeader("Content-Type", "text/csv; charset=utf-8").send(
+				// Convert the JSON object to CSV format
+				// It looks unorthodox but it needs an array with objects
+				// which can be nested but none of them should have arrays
+				// to get the format we want, which is:
+				// tollOpID,requestTimestamp,periodFrom,periodTo,vOpList.visitingOpID,vOpList.nPasses,vOpList.passesCost
+				json2csv(
+					chargesByResult.map((v) => ({
+						...resBody,
+						vOpList: {
+							...v,
+							passesCost: v.passesCost?.toString(),
+						},
+					})),
+					{ expandNestedObjects: true },
+				),
+			);
 		} else {
 			res.json(resBody);
 		}
