@@ -5,6 +5,7 @@ import prisma from "@src/database/prismaClient";
 import { passAnalysisQuery } from "@prisma/client/sql";
 import { paramDateFormat, responseDateFormat } from "@utils/constants";
 import { Prisma } from "@prisma/client";
+import { json2csv } from "json-2-csv";
 
 const passAnalysisRouter = express.Router();
 
@@ -13,6 +14,7 @@ passAnalysisRouter.get(
 	async (req, res) => {
 		try {
 			const { stationOpID, tagOpID, date_from, date_to } = req.params;
+			const { outputFormat } = req.query;
 
 			// Parse the date_from and date_to parameters
 			const dateFrom = parse(date_from, paramDateFormat, new Date());
@@ -56,7 +58,7 @@ passAnalysisRouter.get(
 					),
 				]);
 
-			res.json({
+			const resBody = {
 				stationOpID,
 				tagOpID,
 				requestTimestamp: format(new Date(Date.now()), responseDateFormat),
@@ -64,7 +66,15 @@ passAnalysisRouter.get(
 				periodTo: format(dateTo, responseDateFormat),
 				nPasses: passAnalysisResult.length,
 				passList: passAnalysisResult,
-			});
+			};
+
+			if (outputFormat === "csv") {
+				res
+					.setHeader("Content-Type", "text/csv; charset=utf-8")
+					.send(json2csv([resBody]));
+			} else {
+				res.json(resBody);
+			}
 		} catch (e) {
 			if (
 				e instanceof Prisma.PrismaClientKnownRequestError &&
