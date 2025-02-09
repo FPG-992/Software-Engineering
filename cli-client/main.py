@@ -4,13 +4,12 @@ CLI client for the toll management system (se2401).
 
 Usage examples:
   $ se2401 healthcheck
-  $ se2401 resetpasses --source resetpasses.csv
-  $ se2401 resetstations --source stations.csv
+  $ se2401 resetpasses --source passes01.csv
+  $ se2401 resetstations --source stations01.csv
+  $ se2401 login --username admin --passw mypassword
   $ se2401 tollstationpasses --station NAO01 --from 20241101 --to 20241130 --format json
   $ se2401 passanalysis --stationop AM --tagop NAO --from 20220305 --to 20220319 --format csv
-  $ se2401 passescost --stationop AM --tagop NAO --from 20220305 --to 20220319
-  $ se2401 chargesby --opid AM --from 20220305 --to 20220319
-  $ se2401 admin --addpasses --source passes.csv
+  $ se2401 admin --addpasses --source passes01.csv
 """
 
 import argparse
@@ -22,8 +21,8 @@ import io
 import os
 
 # Base URL for the REST API endpoints.
-# Adjust the host and port as needed.
-BASE_URL = "http://localhost:3000"
+# (Adjust the host and port as needed.)
+BASE_URL = "http://localhost:9115/api"
 
 
 def json_to_csv(data):
@@ -45,11 +44,13 @@ def json_to_csv(data):
     elif isinstance(data, dict):
         # If the dict contains a key holding a list (e.g. passList), output top-level keys first
         if 'passList' in data and isinstance(data['passList'], list):
+            # Output the top-level key/values (excluding passList)
             top_keys = [k for k in data.keys() if k != 'passList']
             writer = csv.writer(output)
             writer.writerow(top_keys)
             writer.writerow([data[k] for k in top_keys])
             output.write("\n")
+            # Now output the passList
             if data['passList']:
                 headers = list(data['passList'][0].keys())
                 writer = csv.DictWriter(output, fieldnames=headers)
@@ -107,6 +108,7 @@ def resetpasses(args):
         sys.exit(1)
     try:
         with open(args.source, "rb") as f:
+            # The API expects the file under the key "file"
             files = {"file": (os.path.basename(args.source), f, "text/csv")}
             r = requests.post(url, files=files)
             print_response(r, args.format)
@@ -124,11 +126,33 @@ def resetstations(args):
         sys.exit(1)
     try:
         with open(args.source, "rb") as f:
+            # The API expects the file under the key "file"
             files = {"file": (os.path.basename(args.source), f, "text/csv")}
             r = requests.post(url, files=files)
             print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
+
+
+# def login(args):
+#     url = f"{BASE_URL}/login"
+#     payload = {"username": args.username, "password": args.passw}
+#     headers = {"Content-Type": "application/x-www-form-urlencoded"}
+#     try:
+#         r = requests.post(url, data=payload, headers=headers)
+#         print_response(r, args.format)
+#     except Exception as e:
+#         print(f"Error connecting to server: {e}")
+
+
+# def logout(args):
+#     url = f"{BASE_URL}/logout"
+#     headers = {"X-OBSERVATORY-AUTH": args.token}
+#     try:
+#         r = requests.post(url, headers=headers)
+#         print_response(r, args.format)
+#     except Exception as e:
+#         print(f"Error connecting to server: {e}")
 
 
 def tollstationpasses(args):
@@ -168,8 +192,22 @@ def chargesby(args):
 
 
 def admin(args):
-    # Only data import functionality is available for the admin scope via --addpasses.
-    if args.addpasses:
+    # Admin can be used for either user management or data import.
+    # If --addpasses is specified, the CSV file must be provided via --source.
+    if args.usermod:
+        # Modify user password: POST /admin/usermod
+        if not (args.username and args.passw):
+            print("Error: --username and --passw are required when using --usermod")
+            sys.exit(1)
+        url = f"{BASE_URL}/admin/usermod"
+        payload = {"username": args.username, "password": args.passw}
+        try:
+            r = requests.post(url, data=payload)
+            print_response(r, args.format)
+        except Exception as e:
+            print(f"Error connecting to server: {e}")
+    elif args.addpasses:
+        # Data import: add passes from CSV: POST /admin/addpasses
         if not args.source:
             print("Error: --source is required when using --addpasses")
             sys.exit(1)
@@ -179,14 +217,20 @@ def admin(args):
         url = f"{BASE_URL}/admin/addpasses"
         try:
             with open(args.source, "rb") as f:
+                # The REST API expects the file to be sent with key "file"
                 files = {"file": (os.path.basename(args.source), f, "text/csv")}
                 r = requests.post(url, files=files)
                 print_response(r, args.format)
         except Exception as e:
             print(f"Error connecting to server: {e}")
     else:
-        print("Error: No valid admin action specified. Use --addpasses to import pass records.")
-        sys.exit(1)
+        # If no specific admin flag is provided, default to listing users: GET /admin/users
+        url = f"{BASE_URL}/admin/users"
+        try:
+            r = requests.get(url)
+            print_response(r, args.format)
+        except Exception as e:
+            print(f"Error connecting to server: {e}")
 
 
 # -------------------------------------------------------------------
@@ -216,6 +260,17 @@ def main():
     parser_resetstations = subparsers.add_parser("resetstations", help="Reset toll stations using a CSV file")
     parser_resetstations.add_argument("--source", required=True, help="Path to the CSV file with toll station records")
     parser_resetstations.set_defaults(func=resetstations)
+
+    # # login (POST /login)
+    # parser_login = subparsers.add_parser("login", help="Login to the system")
+    # parser_login.add_argument("--username", required=True, help="Username")
+    # parser_login.add_argument("--passw", required=True, help="Password")
+    # parser_login.set_defaults(func=login)
+
+    # # logout (POST /logout)
+    # parser_logout = subparsers.add_parser("logout", help="Logout from the system")
+    # parser_logout.add_argument("--token", required=True, help="Authentication token")
+    # parser_logout.set_defaults(func=logout)
 
     # tollstationpasses (GET /tollStationPasses/{tollStationID}/{date_from}/{date_to})
     parser_tsp = subparsers.add_parser("tollstationpasses", help="Retrieve toll station passes")
@@ -247,8 +302,11 @@ def main():
     parser_cb.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_cb.set_defaults(func=chargesby)
 
-    # admin – only for data import: add passes via --addpasses (requires CSV file via --source)
-    parser_admin = subparsers.add_parser("admin", help="Admin functions (data import only)")
+    # admin – used for user management or for data import (addpasses)
+    parser_admin = subparsers.add_parser("admin", help="Admin functions")
+    parser_admin.add_argument("--usermod", action="store_true", help="Modify user password")
+    parser_admin.add_argument("--username", help="Username (for user modification)")
+    parser_admin.add_argument("--passw", help="Password (for user modification)")
     parser_admin.add_argument("--addpasses", action="store_true", help="Import passes from CSV file")
     parser_admin.add_argument("--source", help="CSV file source for pass records (required for --addpasses)")
     parser_admin.set_defaults(func=admin)
