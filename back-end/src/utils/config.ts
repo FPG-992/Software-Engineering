@@ -3,9 +3,10 @@ import { returnIfSetElseThrow } from ".";
 
 const config = dotenv.config();
 
-if (config.error) {
-  throw config.error;
-}
+// * Throw if it does not find a .env file even if environment variables are set
+// if (config.error) {
+//   throw config.error;
+// }
 
 export default {
   BACKEND_PORT: Number.parseInt(
