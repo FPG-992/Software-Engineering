@@ -1,35 +1,43 @@
 import express from "express";
+import https from "https";
+import selfsigned from "selfsigned";
 import cors from "cors";
 
-import "express-async-errors"; // Import this before other routes
-
 import apiRouter from "./controller/api";
-
-
 import config from "./utils/config";
 
 const app = express();
 
-// Cross Origin Resource Sharing
-app.use(
-	cors({
-		origin: "*", // Allow all origins
-	}),
-);
+// Enable CORS (adjust settings as needed)
+app.use(cors({ origin: "*" }));
 
-/*  The json-parser takes the JSON data of a request, transforms it into
-a JavaScript object and then attaches it to the body property of the request
-object before the route handler is called. */
+// Parse incoming JSON requests
 app.use(express.json());
 
+// Mount API routes
 app.use("/api", apiRouter);
 
-
-app.get("/", async (_req, res) => {
-	res.send("Hello World");
+// A simple test route
+app.get("/", (_req, res) => {
+  res.send("Hello World");
 });
 
+// Generate a self-signed certificate valid for 365 days with a 2048-bit key.
+// "localhost" is used as the common name.
+const attrs = [{ name: "commonName", value: "localhost" }];
+const pems = selfsigned.generate(attrs, { days: 365, keySize: 2048 });
 
-app.listen(config.BACKEND_PORT, () => {
-	console.log(`Server is running on port ${config.BACKEND_PORT}`);
+const sslOptions = {
+  key: pems.private,
+  cert: pems.cert,
+};
+
+// Use the port from config (or default to 9115)
+const port = config.BACKEND_PORT || 9115;
+
+// Start the HTTPS server using the generated certificate and key.
+https.createServer(sslOptions, app).listen(port, () => {
+  console.log(`HTTPS server is running on port ${port}`);
 });
+
+export default app;

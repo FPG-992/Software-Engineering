@@ -22,7 +22,7 @@ import os
 
 # Base URL for the REST API endpoints.
 # (Adjust the host and port as needed.)
-BASE_URL = "http://localhost:9115/api"
+BASE_URL = "https://localhost:9115/api"
 
 
 def json_to_csv(data):
