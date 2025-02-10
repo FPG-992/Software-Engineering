@@ -20,6 +20,10 @@ import csv
 import io
 import os
 
+# Create a global session that disables certificate validation.
+session = requests.Session()
+session.verify = False  # Disable certificate validation for all calls.
+
 # Base URL for the REST API endpoints.
 # (Adjust the host and port as needed.)
 BASE_URL = "https://localhost:9115/api"
@@ -92,7 +96,7 @@ def print_response(response, output_format):
 def healthcheck(args):
     url = f"{BASE_URL}/admin/healthcheck"
     try:
-        r = requests.get(url)
+        r = session.get(url)
         print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
@@ -108,9 +112,8 @@ def resetpasses(args):
         sys.exit(1)
     try:
         with open(args.source, "rb") as f:
-            # The API expects the file under the key "file"
             files = {"file": (os.path.basename(args.source), f, "text/csv")}
-            r = requests.post(url, files=files)
+            r = session.post(url, files=files)
             print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
@@ -126,39 +129,17 @@ def resetstations(args):
         sys.exit(1)
     try:
         with open(args.source, "rb") as f:
-            # The API expects the file under the key "file"
             files = {"file": (os.path.basename(args.source), f, "text/csv")}
-            r = requests.post(url, files=files)
+            r = session.post(url, files=files)
             print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
 
 
-# def login(args):
-#     url = f"{BASE_URL}/login"
-#     payload = {"username": args.username, "password": args.passw}
-#     headers = {"Content-Type": "application/x-www-form-urlencoded"}
-#     try:
-#         r = requests.post(url, data=payload, headers=headers)
-#         print_response(r, args.format)
-#     except Exception as e:
-#         print(f"Error connecting to server: {e}")
-
-
-# def logout(args):
-#     url = f"{BASE_URL}/logout"
-#     headers = {"X-OBSERVATORY-AUTH": args.token}
-#     try:
-#         r = requests.post(url, headers=headers)
-#         print_response(r, args.format)
-#     except Exception as e:
-#         print(f"Error connecting to server: {e}")
-
-
 def tollstationpasses(args):
     url = f"{BASE_URL}/tollStationPasses/{args.station}/{args.from_date}/{args.to_date}"
     try:
-        r = requests.get(url)
+        r = session.get(url)
         print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
@@ -167,7 +148,7 @@ def tollstationpasses(args):
 def passanalysis(args):
     url = f"{BASE_URL}/passAnalysis/{args.stationop}/{args.tagop}/{args.from_date}/{args.to_date}"
     try:
-        r = requests.get(url)
+        r = session.get(url)
         print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
@@ -176,7 +157,7 @@ def passanalysis(args):
 def passescost(args):
     url = f"{BASE_URL}/passesCost/{args.stationop}/{args.tagop}/{args.from_date}/{args.to_date}"
     try:
-        r = requests.get(url)
+        r = session.get(url)
         print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
@@ -185,29 +166,25 @@ def passescost(args):
 def chargesby(args):
     url = f"{BASE_URL}/chargesBy/{args.opid}/{args.from_date}/{args.to_date}"
     try:
-        r = requests.get(url)
+        r = session.get(url)
         print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
 
 
 def admin(args):
-    # Admin can be used for either user management or data import.
-    # If --addpasses is specified, the CSV file must be provided via --source.
     if args.usermod:
-        # Modify user password: POST /admin/usermod
         if not (args.username and args.passw):
             print("Error: --username and --passw are required when using --usermod")
             sys.exit(1)
         url = f"{BASE_URL}/admin/usermod"
         payload = {"username": args.username, "password": args.passw}
         try:
-            r = requests.post(url, data=payload)
+            r = session.post(url, data=payload)
             print_response(r, args.format)
         except Exception as e:
             print(f"Error connecting to server: {e}")
     elif args.addpasses:
-        # Data import: add passes from CSV: POST /admin/addpasses
         if not args.source:
             print("Error: --source is required when using --addpasses")
             sys.exit(1)
@@ -217,25 +194,20 @@ def admin(args):
         url = f"{BASE_URL}/admin/addpasses"
         try:
             with open(args.source, "rb") as f:
-                # The REST API expects the file to be sent with key "file"
                 files = {"file": (os.path.basename(args.source), f, "text/csv")}
-                r = requests.post(url, files=files)
+                r = session.post(url, files=files)
                 print_response(r, args.format)
         except Exception as e:
             print(f"Error connecting to server: {e}")
     else:
-        # If no specific admin flag is provided, default to listing users: GET /admin/users
         url = f"{BASE_URL}/admin/users"
         try:
-            r = requests.get(url)
+            r = session.get(url)
             print_response(r, args.format)
         except Exception as e:
             print(f"Error connecting to server: {e}")
 
 
-# -------------------------------------------------------------------
-# Main – argument parsing and dispatch to the correct function
-# -------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser(
         prog="se2401",
@@ -247,39 +219,23 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="scope", required=True, help="Available scopes")
 
-    # healthcheck (GET /admin/healthcheck)
     parser_health = subparsers.add_parser("healthcheck", help="Check system health")
     parser_health.set_defaults(func=healthcheck)
 
-    # resetpasses (POST /admin/resetpasses) – requires CSV file via --source
     parser_resetpasses = subparsers.add_parser("resetpasses", help="Reset all pass records using a CSV file")
     parser_resetpasses.add_argument("--source", required=True, help="Path to the CSV file with pass records")
     parser_resetpasses.set_defaults(func=resetpasses)
 
-    # resetstations (POST /admin/resetstations) – requires CSV file via --source
     parser_resetstations = subparsers.add_parser("resetstations", help="Reset toll stations using a CSV file")
     parser_resetstations.add_argument("--source", required=True, help="Path to the CSV file with toll station records")
     parser_resetstations.set_defaults(func=resetstations)
 
-    # # login (POST /login)
-    # parser_login = subparsers.add_parser("login", help="Login to the system")
-    # parser_login.add_argument("--username", required=True, help="Username")
-    # parser_login.add_argument("--passw", required=True, help="Password")
-    # parser_login.set_defaults(func=login)
-
-    # # logout (POST /logout)
-    # parser_logout = subparsers.add_parser("logout", help="Logout from the system")
-    # parser_logout.add_argument("--token", required=True, help="Authentication token")
-    # parser_logout.set_defaults(func=logout)
-
-    # tollstationpasses (GET /tollStationPasses/{tollStationID}/{date_from}/{date_to})
     parser_tsp = subparsers.add_parser("tollstationpasses", help="Retrieve toll station passes")
     parser_tsp.add_argument("--station", required=True, help="Toll station ID")
     parser_tsp.add_argument("--from", dest="from_date", required=True, help="Start date (YYYYMMDD)")
     parser_tsp.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_tsp.set_defaults(func=tollstationpasses)
 
-    # passanalysis (GET /passAnalysis/{stationOpID}/{tagOpID}/{date_from}/{date_to})
     parser_pa = subparsers.add_parser("passanalysis", help="Analyze passes between operators")
     parser_pa.add_argument("--stationop", required=True, help="Station operator ID")
     parser_pa.add_argument("--tagop", required=True, help="Tag operator ID")
@@ -287,7 +243,6 @@ def main():
     parser_pa.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_pa.set_defaults(func=passanalysis)
 
-    # passescost (GET /passesCost/{tollOpID}/{tagOpID}/{date_from}/{date_to})
     parser_pc = subparsers.add_parser("passescost", help="Calculate cost of passes")
     parser_pc.add_argument("--stationop", required=True, help="Station operator ID")
     parser_pc.add_argument("--tagop", required=True, help="Tag operator ID")
@@ -295,14 +250,12 @@ def main():
     parser_pc.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_pc.set_defaults(func=passescost)
 
-    # chargesby (GET /chargesBy/{tollOpID}/{date_from}/{date_to})
     parser_cb = subparsers.add_parser("chargesby", help="Retrieve charges by operator")
     parser_cb.add_argument("--opid", required=True, help="Operator ID")
     parser_cb.add_argument("--from", dest="from_date", required=True, help="Start date (YYYYMMDD)")
     parser_cb.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_cb.set_defaults(func=chargesby)
 
-    # admin – used for user management or for data import (addpasses)
     parser_admin = subparsers.add_parser("admin", help="Admin functions")
     parser_admin.add_argument("--usermod", action="store_true", help="Modify user password")
     parser_admin.add_argument("--username", help="Username (for user modification)")
