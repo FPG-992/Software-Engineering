@@ -4,6 +4,7 @@
   "description": "Ενδεικτικά περιεχόμενα:",
   "main": "index.ts",
   "scripts": {
+    "dbinit": "npm run ts-node ./src/database/init.ts",
     "dev": "npm run ts-node ./src/index.ts",
     "tsc": "tsc",
     "ts-node": "node --env-file-if-exists=.env -r ts-node/register -r tsconfig-paths/register",

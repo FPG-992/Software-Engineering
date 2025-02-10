@@ -112,38 +112,23 @@ describe("Testing admin controller", async () => {
 		await t.test("Resetting the passes when there are no records", async () => {
 			// Delete all records of passes
 			await prisma.pass.deleteMany();
-
-			// Setting content type: multipart/form-data and mime type: 'text/csv'
-			const response = await api
-				.post("/api/admin/resetpasses")
-				.set("Content-Type", "multipart/form-data")
-				.attach("file", passesSamplePath, { contentType: "text/csv" });
+			const response = await api.post("/api/admin/resetpasses");
 
 			assert.strictEqual(response.status, 200);
 			assert.strictEqual(response.body?.status, "OK");
 
-			// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
-			assert.strictEqual(
-				await prisma.pass.count(),
-				await csvRowCount(passesSamplePath),
-			);
+			// Check if the number of records of passes in the database is 0
+			assert.strictEqual(await prisma.pass.count(), 0);
 		});
 
 		await t.test("Resetting the passes when records exist", async () => {
-			// Setting content type: multipart/form-data and mime type: 'text/csv'
-			const response = await api
-				.post("/api/admin/resetpasses")
-				.set("Content-Type", "multipart/form-data")
-				.attach("file", passesSamplePath, { contentType: "text/csv" });
+			const response = await api.post("/api/admin/resetpasses");
 
 			assert.strictEqual(response.status, 200);
 			assert.strictEqual(response.body?.status, "OK");
 
 			// Check if the number of records of passes in the database is equal to the number of rows in the CSV file
-			assert.strictEqual(
-				await prisma.pass.count(),
-				await csvRowCount(passesSamplePath),
-			);
+			assert.strictEqual(await prisma.pass.count(), 0);
 		});
 	});
 
@@ -155,7 +140,7 @@ describe("Testing admin controller", async () => {
 				.set("Content-Type", "multipart/form-data")
 				.attach("file", tollStationsSamplePath, { contentType: "text/csv" });
 			await api
-				.post("/api/admin/resetpasses")
+				.post("/api/admin/addpasses")
 				.set("Content-Type", "multipart/form-data")
 				.attach("file", passesSamplePath, { contentType: "text/csv" });
 
