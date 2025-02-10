@@ -1,19 +1,27 @@
 FROM node:22-alpine
 
+# Upgrade npm
 RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
-ADD ./front-end/package*.json ./
+# Copy backend package files (adjust the path if needed)
+ADD ./back-end/package*.json ./
 
-# Add bash
+# Install bash and other utilities
 RUN apk update && apk add --no-cache bash
 
-# Change shell representation (removing Docker ID as info)
-RUN echo 'export PS1="\w\\$ "' >> ~/.bashrc
+# Change shell prompt for clarity and switch default shell to bash
+RUN echo 'export PS1="\w\\$ "' >> ~/.bashrc && \
+    sed -i -e "s/bin\/ash/bin\/bash/" /etc/passwd
 
-# Change default shell to bash
-RUN sed -i -e "s/bin\/ash/bin\/bash/" /etc/passwd
+# Copy all back-end source files
+COPY ./back-end .
 
-ENTRYPOINT ["bash" , "-c"]
+# Declare the SSL folder as a volume for persisting generated certificate files
+VOLUME ["/usr/src/app/SSL"]
 
+# Expose the backend port (default 9115)
+EXPOSE 9115
+
+ENTRYPOINT ["bash", "-c"]
