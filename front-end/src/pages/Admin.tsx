@@ -1,4 +1,3 @@
-// src/pages/Admin.tsx
 import React, { useState } from 'react';
 import { addPasses, resetPasses, resetStations } from '../services/api';
 
@@ -14,20 +13,20 @@ const Admin: React.FC = () => {
     if (e.target.files) setFile(e.target.files[0]);
   };
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) {
+    if (uploadType === 'addpasses' && !file) {
       setError('Please select a file.');
       return;
     }
     try {
       let response;
       if (uploadType === 'addpasses') {
-        response = await addPasses(file);
+        response = await addPasses(file!);
       } else if (uploadType === 'resetpasses') {
-        response = await resetPasses(file);
+        response = await resetPasses();
       } else if (uploadType === 'resetstations') {
-        response = await resetStations(file);
+        response = await resetStations();
       }
       
       if (!response) {
@@ -58,7 +57,7 @@ const Admin: React.FC = () => {
         <p>
           <strong>Βήμα 4:</strong> Επιστρέφεται επιβεβαίωση στον λειτουργό.
         </p>
-        <form onSubmit={handleUpload}>
+        <form onSubmit={handleSubmit}>
           <label>
             Επιλέξτε Ενέργεια:
             <select
@@ -71,12 +70,16 @@ const Admin: React.FC = () => {
             </select>
           </label>
           <br />
-          <label>
-            Επιλέξτε αρχείο CSV:
-            <input type="file" accept=".csv" onChange={handleFileChange} required />
-          </label>
+          {uploadType === 'addpasses' && (
+            <label>
+              Επιλέξτε αρχείο CSV:
+              <input type="file" accept=".csv" onChange={handleFileChange} required={uploadType === 'addpasses'} />
+            </label>
+          )}
           <br />
-          <button type="submit">Αποστολή</button>
+          <button type="submit">
+            {uploadType === 'addpasses' ? 'Αποστολή' : 'Επαναφορά'}
+          </button>
         </form>
         {error && <p className="error-message">Error: {error}</p>}
       </div>

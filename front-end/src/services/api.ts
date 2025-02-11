@@ -26,7 +26,7 @@ export const getPassesCost = (stationOp: string, tagOp: string, from: string, to
 export const getChargesBy = (opid: string, from: string, to: string) =>
   api.get(`/chargesBy/${opid}/${from}/${to}`);
 
-// POST endpoints for CSV file uploads:
+// POST endpoints:
 export const postCsvFile = (endpoint: string, file: File) => {
   const formData = new FormData();
   formData.append('file', file);
@@ -35,9 +35,9 @@ export const postCsvFile = (endpoint: string, file: File) => {
   });
 };
 
-// Convenience functions for each CSV endpoint:
-export const resetPasses = (file: File) => postCsvFile('/admin/resetpasses', file);
-export const resetStations = (file: File) => postCsvFile('/admin/resetstations', file);
+// Modified endpoints:
+export const resetPasses = () => api.post('/admin/resetpasses');
+export const resetStations = () => api.post('/admin/resetstations');
 export const addPasses = (file: File) => postCsvFile('/admin/addpasses', file);
 
 export default api;

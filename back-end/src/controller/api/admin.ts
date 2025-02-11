@@ -1,5 +1,8 @@
 import express from "express";
 import multer from "multer";
+import fs from "fs";
+import path from "path";
+import { Readable } from "node:stream";
 
 import config from "@utils/config";
 import prisma from "@src/database/prismaClient";
@@ -7,20 +10,15 @@ import {
 	csvPassesStreamToJson,
 	csvTollStationsStreamToJson,
 } from "@utils/csv_handlers";
-import { Readable } from "node:stream";
-
 import { tagRefCount } from "@prisma/client/sql";
 
 const adminRouter = express.Router();
-// Because we are using memory storage, the file will be stored in memory and not on disk
-// and will be available only as a buffer. Buffer then has to be converted to a stream
-// using ""
+// Using memory storage for file uploads (only used for /addpasses)
 const upload = multer({ storage: multer.memoryStorage() });
 
 adminRouter.get("/healthcheck", async (_, res) => {
 	try {
 		const tagRefCountQueryResult = await prisma.$queryRawTyped(tagRefCount());
-
 		const n_stations = await prisma.tollStation.count();
 		const n_tags = Number(tagRefCountQueryResult.at(0)?.count ?? 0);
 		const n_passes = await prisma.pass.count();
@@ -32,7 +30,8 @@ adminRouter.get("/healthcheck", async (_, res) => {
 			n_tags,
 			n_passes,
 		});
-	} catch {
+	} catch (e) {
+		console.error("Error in /healthcheck:", e);
 		res.status(401).json({
 			status: "failed",
 			dbconnection: config.DATABASE_URL,
@@ -40,29 +39,23 @@ adminRouter.get("/healthcheck", async (_, res) => {
 	}
 });
 
-adminRouter.post("/resetstations", upload.single("file"), async (req, res) => {
+// /admin/resetstations now reads from a local CSV file
+adminRouter.post("/resetstations", async (req, res) => {
 	try {
-		// The attribute name in the request body must match the form field name
-		// in upload.single("file"), which is "file"
-		const file = req.file;
-		if (!file) {
-			res.status(400).json({ status: "failed", reason: "No file uploaded" });
-			return;
-		}
-
-		if (file.mimetype !== "text/csv") {
-			res.status(400).json({
+		// Use the global __dirname available in CommonJS
+		const filePath = path.join(__dirname, "../../../data/tollstations2024.csv");
+		if (!fs.existsSync(filePath)) {
+			res.status(500).json({
 				status: "failed",
-				reason: "Invalid file type. Only CSV files are allowed.",
+				info: "Toll stations file not found at " + filePath,
 			});
 			return;
 		}
 
-		const fileStream = Readable.from(file.buffer);
+		const fileStream = fs.createReadStream(filePath);
 		const tollStations = await csvTollStationsStreamToJson(fileStream);
 
-		// Use Prisma transaction to add all toll stations in a single transaction
-		// This ensures that either all or none of the passes are added
+		// Prisma transaction to clear and reinitialize toll stations
 		await prisma.$transaction(
 			async (tx) => {
 				await tx.tollStation.deleteMany();
@@ -70,27 +63,28 @@ adminRouter.post("/resetstations", upload.single("file"), async (req, res) => {
 					data: tollStations,
 				});
 			},
-			// https://www.prisma.io/docs/orm/prisma-client/queries/transactions#transaction-options
-			{ maxWait: 5000, timeout: 10000 },
+			{ maxWait: 5000, timeout: 10000 }
 		);
 
 		res.status(200).json({ status: "OK" });
 	} catch (e) {
-		res
-			.status(500)
-			.json({ status: "failed", info: "Error adding toll stations" });
+		console.error("Error in /resetstations:", e);
+		res.status(500).json({ status: "failed", info: "Error adding toll stations" });
 	}
 });
 
+// /admin/resetpasses now only deletes passes (removing any reference to a non-existent tag model)
 adminRouter.post("/resetpasses", async (req, res) => {
 	try {
 		await prisma.pass.deleteMany({});
 		res.status(200).json({ status: "OK" });
 	} catch (e) {
+		console.error("Error in /resetpasses:", e);
 		res.status(500).json({ status: "failed", info: "Error resetting passes" });
 	}
 });
 
+// /admin/addpasses endpoint expects a CSV upload
 adminRouter.post("/addpasses", upload.single("file"), async (req, res) => {
 	try {
 		const file = req.file;
@@ -110,20 +104,18 @@ adminRouter.post("/addpasses", upload.single("file"), async (req, res) => {
 		const fileStream = Readable.from(file.buffer);
 		const passes = await csvPassesStreamToJson(fileStream);
 
-		// Use Prisma transaction to add all passes in a single transaction
-		// This ensures that either all or none of the passes are added
 		await prisma.$transaction(
 			async (tx) => {
 				await tx.pass.createMany({
 					data: passes,
 				});
 			},
-			// https://www.prisma.io/docs/orm/prisma-client/queries/transactions#transaction-options
-			{ maxWait: 5000, timeout: 10000 },
+			{ maxWait: 5000, timeout: 10000 }
 		);
 
 		res.status(200).json({ status: "OK" });
 	} catch (e) {
+		console.error("Error in /addpasses:", e);
 		res.status(500).json({ status: "failed", info: "Error adding passes" });
 	}
 });
