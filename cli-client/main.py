@@ -101,40 +101,21 @@ def healthcheck(args):
     except Exception as e:
         print(f"Error connecting to server: {e}")
 
-
 def resetpasses(args):
     url = f"{BASE_URL}/admin/resetpasses"
-    if not args.source:
-        print("Error: --source is required for resetpasses because a CSV file must be provided.")
-        sys.exit(1)
-    if not os.path.isfile(args.source):
-        print(f"Error: File '{args.source}' does not exist.")
-        sys.exit(1)
     try:
-        with open(args.source, "rb") as f:
-            files = {"file": (os.path.basename(args.source), f, "text/csv")}
-            r = session.post(url, files=files)
-            print_response(r, args.format)
+        r = session.post(url)
+        print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
-
 
 def resetstations(args):
     url = f"{BASE_URL}/admin/resetstations"
-    if not args.source:
-        print("Error: --source is required for resetstations because a CSV file must be provided.")
-        sys.exit(1)
-    if not os.path.isfile(args.source):
-        print(f"Error: File '{args.source}' does not exist.")
-        sys.exit(1)
     try:
-        with open(args.source, "rb") as f:
-            files = {"file": (os.path.basename(args.source), f, "text/csv")}
-            r = session.post(url, files=files)
-            print_response(r, args.format)
+        r = session.post(url)
+        print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
-
 
 def tollstationpasses(args):
     url = f"{BASE_URL}/tollStationPasses/{args.station}/{args.from_date}/{args.to_date}"
@@ -222,12 +203,10 @@ def main():
     parser_health = subparsers.add_parser("healthcheck", help="Check system health")
     parser_health.set_defaults(func=healthcheck)
 
-    parser_resetpasses = subparsers.add_parser("resetpasses", help="Reset all pass records using a CSV file")
-    parser_resetpasses.add_argument("--source", required=True, help="Path to the CSV file with pass records")
+    parser_resetpasses = subparsers.add_parser("resetpasses", help="Reset all pass records")
     parser_resetpasses.set_defaults(func=resetpasses)
 
-    parser_resetstations = subparsers.add_parser("resetstations", help="Reset toll stations using a CSV file")
-    parser_resetstations.add_argument("--source", required=True, help="Path to the CSV file with toll station records")
+    parser_resetstations = subparsers.add_parser("resetstations", help="Reset toll stations using tollstations2024.csv")
     parser_resetstations.set_defaults(func=resetstations)
 
     parser_tsp = subparsers.add_parser("tollstationpasses", help="Retrieve toll station passes")
