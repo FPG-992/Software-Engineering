@@ -217,9 +217,8 @@ def main():
     subparsers = parser.add_subparsers(dest="scope", required=True, help="Available scopes")
 
     # healthcheck
-    parser_health = subparsers.add_parser("healthcheck", help="Check system health",
-                                            parents=[global_parser])
-    parser_health.set_defaults(func=healthcheck)
+    parser_health = subparsers.add_parser("healthcheck", help="Check system health", parents=[global_parser])
+    parser_health.set_defaults(func=healthcheck, format="json")
 
     # resetpasses
     parser_resetpasses = subparsers.add_parser("resetpasses", help="Reset all pass records",
