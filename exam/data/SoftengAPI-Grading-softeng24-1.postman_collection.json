@@ -231,7 +231,7 @@
                 }
             ],
             "request": {
-                "method": "POST",
+                "method": "GET",
                 "header": [
                     {
                         "key": "Authorization",
@@ -371,7 +371,7 @@
                 }
             ],
             "request": {
-                "method": "POST",
+                "method": "GET",
                 "header": [
                     {
                         "key": "Authorization",
@@ -511,7 +511,7 @@
                 }
             ],
             "request": {
-                "method": "POST",
+                "method": "GET",
                 "header": [
                     {
                         "key": "Authorization",
