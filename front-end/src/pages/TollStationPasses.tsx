@@ -1,18 +1,31 @@
-// src/pages/TollStationPasses.tsx
 import React, { useState } from 'react';
 import { getTollStationPasses } from '../services/api';
 
 interface Pass {
-  id: number;
-  vehicle: string;
+  passIndex: number;
+  passID: string;
   timestamp: string;
-  charge: number;
+  tagID: string;
+  tagProvider: string;
+  passType: string;
+  passCharge: string;
+}
+
+interface StationPassesResponse {
+  stationID: string;
+  stationOperator: string;
+  requestTimestamp: string;
+  periodFrom: string;
+  periodTo: string;
+  nPasses: number;
+  passList: Pass[];
 }
 
 const TollStationPasses: React.FC = () => {
   const [station, setStation] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [response, setResponse] = useState<StationPassesResponse | null>(null);
   const [passes, setPasses] = useState<Pass[]>([]);
   const [error, setError] = useState('');
 
@@ -20,6 +33,7 @@ const TollStationPasses: React.FC = () => {
     e.preventDefault();
     getTollStationPasses(station, from, to)
       .then((response) => {
+        setResponse(response.data);
         setPasses(response.data.passList || []);
         setError('');
       })
@@ -59,22 +73,34 @@ const TollStationPasses: React.FC = () => {
       {passes.length > 0 && (
         <div className="card">
           <h2>Passes List</h2>
-          <table>
+          {response && (
+            <div className="station-info">
+              <p><strong>Station ID:</strong> {response.stationID}</p>
+              <p><strong>Operator:</strong> {response.stationOperator}</p>
+              <p><strong>Period:</strong> {response.periodFrom} to {response.periodTo}</p>
+              <p><strong>Total Passes:</strong> {response.nPasses}</p>
+            </div>
+          )}
+          <table className="data-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Vehicle</th>
+                <th>Pass ID</th>
+                <th>Tag ID</th>
+                <th>Provider</th>
+                <th>Type</th>
                 <th>Timestamp</th>
-                <th>Charge</th>
+                <th>Charge (€)</th>
               </tr>
             </thead>
             <tbody>
               {passes.map((pass) => (
-                <tr key={pass.id}>
-                  <td>{pass.id}</td>
-                  <td>{pass.vehicle}</td>
+                <tr key={pass.passID}>
+                  <td>{pass.passID}</td>
+                  <td>{pass.tagID}</td>
+                  <td>{pass.tagProvider}</td>
+                  <td>{pass.passType}</td>
                   <td>{pass.timestamp}</td>
-                  <td>{pass.charge}</td>
+                  <td>€{parseFloat(pass.passCharge).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { getChargesBy } from '../services/api';
 
 interface Charge {
-  operatorId: string;
-  charge: number;
+  visitingOpID: string;  // changed from operatorId
+  nPasses: number;       // added
+  passesCost: string;    // changed from charge: number
 }
 
 interface ChargesByResponse {
@@ -12,7 +13,7 @@ interface ChargesByResponse {
   requestTimestamp: string;
   periodFrom: string;
   periodTo: string;
-  vOpList: Charge[];
+  vOpList: Charge[];    // This array contains the updated Charge interface
 }
 
 const ChargesBy: React.FC = () => {
@@ -79,15 +80,17 @@ const ChargesBy: React.FC = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Operator</th>
-                  <th>Charge</th>
+                  <th>Visiting Operator</th>
+                  <th>Number of Passes</th>
+                  <th>Total Cost</th>
                 </tr>
               </thead>
               <tbody>
                 {result.vOpList.map((charge, index) => (
                   <tr key={index}>
-                    <td>{charge.operatorId}</td>
-                    <td>{charge.charge}</td>
+                    <td>{charge.visitingOpID}</td>
+                    <td>{charge.nPasses}</td>
+                    <td>€{parseFloat(charge.passesCost).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

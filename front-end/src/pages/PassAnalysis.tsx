@@ -1,12 +1,13 @@
-// src/pages/PassAnalysis.tsx
 import React, { useState } from 'react';
 import { getPassAnalysis } from '../services/api';
 
 interface Pass {
-  id: number;
-  vehicle: string;
+  passIndex: number;
+  passID: string;
+  stationID: string;
   timestamp: string;
-  charge: number;
+  tagID: string;
+  passCharge: string;
 }
 
 interface AnalysisResponse {
@@ -86,22 +87,24 @@ const PassAnalysis: React.FC = () => {
           <p><strong>Period:</strong> {result.periodFrom} to {result.periodTo}</p>
           <p><strong>Number of Passes:</strong> {result.nPasses}</p>
           {result.passList && result.passList.length > 0 ? (
-            <table>
+            <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Vehicle</th>
+                  <th>Pass ID</th>
+                  <th>Station ID</th>
+                  <th>Tag ID</th>
                   <th>Timestamp</th>
-                  <th>Charge</th>
+                  <th>Charge (€)</th>
                 </tr>
               </thead>
               <tbody>
                 {result.passList.map((pass) => (
-                  <tr key={pass.id}>
-                    <td>{pass.id}</td>
-                    <td>{pass.vehicle}</td>
+                  <tr key={pass.passID}>
+                    <td>{pass.passID}</td>
+                    <td>{pass.stationID}</td>
+                    <td>{pass.tagID}</td>
                     <td>{pass.timestamp}</td>
-                    <td>{pass.charge}</td>
+                    <td>€{parseFloat(pass.passCharge).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
