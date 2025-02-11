@@ -19,6 +19,12 @@ import json
 import csv
 import io
 import os
+import warnings
+from urllib3.exceptions import InsecureRequestWarning
+
+# Disable SSL warnings.
+warnings.filterwarnings('ignore', category=InsecureRequestWarning)
+
 
 # Create a global session that disables certificate validation.
 session = requests.Session()
@@ -77,17 +83,24 @@ def print_response(response, output_format):
     """
     try:
         data = response.json()
+        if data.get('status') == 'failed':
+            print(f"Error: {data.get('info', 'Unknown error')}")
+            return
+            
+        if output_format == "json":
+            print(json.dumps(data, indent=2))
+        else:  # default CSV
+            # Only print the values, not the key,value header
+            if isinstance(data, dict):
+                for k, v in data.items():
+                    print(f"{v}")
+            else:
+                csv_data = json_to_csv(data)
+                print(csv_data)
     except ValueError:
         print("Response is not valid JSON:")
         print(response.text)
         return
-
-    if output_format == "json":
-        print(json.dumps(data, indent=2))
-    else:  # default CSV
-        csv_data = json_to_csv(data)
-        print(csv_data)
-
 
 # -------------------------------------------------------------------
 # Endpoint functions – each CLI “scope” calls its corresponding REST API endpoint.
