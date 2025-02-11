@@ -4,9 +4,8 @@ CLI client for the toll management system (se2401).
 
 Usage examples:
   $ se2401 healthcheck
-  $ se2401 resetpasses --source passes01.csv
-  $ se2401 resetstations --source stations01.csv
-  $ se2401 login --username admin --passw mypassword
+  $ se2401 resetpasses
+  $ se2401 resetstations
   $ se2401 tollstationpasses --station NAO01 --from 20241101 --to 20241130 --format json
   $ se2401 passanalysis --stationop AM --tagop NAO --from 20220305 --to 20220319 --format csv
   $ se2401 admin --addpasses --source passes01.csv
@@ -24,7 +23,6 @@ from urllib3.exceptions import InsecureRequestWarning
 
 # Disable SSL warnings.
 warnings.filterwarnings('ignore', category=InsecureRequestWarning)
-
 
 # Create a global session that disables certificate validation.
 session = requests.Session()
@@ -80,20 +78,33 @@ def json_to_csv(data):
 def print_response(response, output_format):
     """
     Print the response from the API in either JSON or CSV format.
+    All results (if containing a timestamp field) are sorted in ascending order by timestamp.
     """
     try:
         data = response.json()
+        # If the API indicates failure, report the error.
         if data.get('status') == 'failed':
             print(f"Error: {data.get('info', 'Unknown error')}")
             return
-            
+
+        # --- Sorting logic based on timestamp (if applicable) ---
+        if isinstance(data, list) and data and "timestamp" in data[0]:
+            data.sort(key=lambda x: x["timestamp"])
+        elif isinstance(data, dict):
+            # If there's an internal list (e.g. passList) with timestamps, sort it.
+            if "passList" in data and isinstance(data["passList"], list) and data["passList"] and "timestamp" in data["passList"][0]:
+                data["passList"].sort(key=lambda x: x["timestamp"])
+
+        # --- End Sorting Logic ---
+
         if output_format == "json":
             print(json.dumps(data, indent=2))
-        else:  # default CSV
-            # Only print the values, not the key,value header
-            if isinstance(data, dict):
+        else:  # CSV format
+            # If data is a dict without an internal list, print key/value rows.
+            if isinstance(data, dict) and 'passList' not in data:
+                print("key,value")
                 for k, v in data.items():
-                    print(f"{v}")
+                    print(f"{k},{v}")
             else:
                 csv_data = json_to_csv(data)
                 print(csv_data)
@@ -101,6 +112,7 @@ def print_response(response, output_format):
         print("Response is not valid JSON:")
         print(response.text)
         return
+
 
 # -------------------------------------------------------------------
 # Endpoint functions – each CLI “scope” calls its corresponding REST API endpoint.
@@ -114,6 +126,7 @@ def healthcheck(args):
     except Exception as e:
         print(f"Error connecting to server: {e}")
 
+
 def resetpasses(args):
     url = f"{BASE_URL}/admin/resetpasses"
     try:
@@ -122,6 +135,7 @@ def resetpasses(args):
     except Exception as e:
         print(f"Error connecting to server: {e}")
 
+
 def resetstations(args):
     url = f"{BASE_URL}/admin/resetstations"
     try:
@@ -129,6 +143,7 @@ def resetstations(args):
         print_response(r, args.format)
     except Exception as e:
         print(f"Error connecting to server: {e}")
+
 
 def tollstationpasses(args):
     url = f"{BASE_URL}/tollStationPasses/{args.station}/{args.from_date}/{args.to_date}"
@@ -167,18 +182,7 @@ def chargesby(args):
 
 
 def admin(args):
-    if args.usermod:
-        if not (args.username and args.passw):
-            print("Error: --username and --passw are required when using --usermod")
-            sys.exit(1)
-        url = f"{BASE_URL}/admin/usermod"
-        payload = {"username": args.username, "password": args.passw}
-        try:
-            r = session.post(url, data=payload)
-            print_response(r, args.format)
-        except Exception as e:
-            print(f"Error connecting to server: {e}")
-    elif args.addpasses:
+    if args.addpasses:
         if not args.source:
             print("Error: --source is required when using --addpasses")
             sys.exit(1)
@@ -194,71 +198,82 @@ def admin(args):
         except Exception as e:
             print(f"Error connecting to server: {e}")
     else:
-        url = f"{BASE_URL}/admin/users"
-        try:
-            r = session.get(url)
-            print_response(r, args.format)
-        except Exception as e:
-            print(f"Error connecting to server: {e}")
+        print("Error: No valid admin option provided. Use --addpasses with a valid --source.")
+        sys.exit(1)
 
 
 def main():
+    # Create a parent parser with global arguments.
+    global_parser = argparse.ArgumentParser(add_help=False)
+    global_parser.add_argument("--format", default="csv", choices=["csv", "json"],
+                               help="Output format (default: csv)")
+
+    # Main parser includes the global arguments.
     parser = argparse.ArgumentParser(
         prog="se2401",
-        description="CLI client for the toll management system"
-    )
-    parser.add_argument(
-        "--format", default="csv", choices=["csv", "json"],
-        help="Output format (default: csv)"
+        description="CLI client for the toll management system",
+        parents=[global_parser]
     )
     subparsers = parser.add_subparsers(dest="scope", required=True, help="Available scopes")
 
-    parser_health = subparsers.add_parser("healthcheck", help="Check system health")
+    # healthcheck
+    parser_health = subparsers.add_parser("healthcheck", help="Check system health",
+                                            parents=[global_parser])
     parser_health.set_defaults(func=healthcheck)
 
-    parser_resetpasses = subparsers.add_parser("resetpasses", help="Reset all pass records")
+    # resetpasses
+    parser_resetpasses = subparsers.add_parser("resetpasses", help="Reset all pass records",
+                                               parents=[global_parser])
     parser_resetpasses.set_defaults(func=resetpasses)
 
-    parser_resetstations = subparsers.add_parser("resetstations", help="Reset toll stations using tollstations2024.csv")
+    # resetstations
+    parser_resetstations = subparsers.add_parser("resetstations", help="Reset toll stations",
+                                                  parents=[global_parser])
     parser_resetstations.set_defaults(func=resetstations)
 
-    parser_tsp = subparsers.add_parser("tollstationpasses", help="Retrieve toll station passes")
+    # tollstationpasses
+    parser_tsp = subparsers.add_parser("tollstationpasses", help="Retrieve toll station passes",
+                                       parents=[global_parser])
     parser_tsp.add_argument("--station", required=True, help="Toll station ID")
     parser_tsp.add_argument("--from", dest="from_date", required=True, help="Start date (YYYYMMDD)")
     parser_tsp.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_tsp.set_defaults(func=tollstationpasses)
 
-    parser_pa = subparsers.add_parser("passanalysis", help="Analyze passes between operators")
+    # passanalysis
+    parser_pa = subparsers.add_parser("passanalysis", help="Analyze passes between operators",
+                                      parents=[global_parser])
     parser_pa.add_argument("--stationop", required=True, help="Station operator ID")
     parser_pa.add_argument("--tagop", required=True, help="Tag operator ID")
     parser_pa.add_argument("--from", dest="from_date", required=True, help="Start date (YYYYMMDD)")
     parser_pa.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_pa.set_defaults(func=passanalysis)
 
-    parser_pc = subparsers.add_parser("passescost", help="Calculate cost of passes")
+    # passescost
+    parser_pc = subparsers.add_parser("passescost", help="Calculate cost of passes",
+                                      parents=[global_parser])
     parser_pc.add_argument("--stationop", required=True, help="Station operator ID")
     parser_pc.add_argument("--tagop", required=True, help="Tag operator ID")
     parser_pc.add_argument("--from", dest="from_date", required=True, help="Start date (YYYYMMDD)")
     parser_pc.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_pc.set_defaults(func=passescost)
 
-    parser_cb = subparsers.add_parser("chargesby", help="Retrieve charges by operator")
+    # chargesby
+    parser_cb = subparsers.add_parser("chargesby", help="Retrieve charges by operator",
+                                      parents=[global_parser])
     parser_cb.add_argument("--opid", required=True, help="Operator ID")
     parser_cb.add_argument("--from", dest="from_date", required=True, help="Start date (YYYYMMDD)")
     parser_cb.add_argument("--to", dest="to_date", required=True, help="End date (YYYYMMDD)")
     parser_cb.set_defaults(func=chargesby)
 
-    parser_admin = subparsers.add_parser("admin", help="Admin functions")
-    parser_admin.add_argument("--usermod", action="store_true", help="Modify user password")
-    parser_admin.add_argument("--username", help="Username (for user modification)")
-    parser_admin.add_argument("--passw", help="Password (for user modification)")
+    # admin
+    parser_admin = subparsers.add_parser("admin", help="Admin functions",
+                                         parents=[global_parser])
     parser_admin.add_argument("--addpasses", action="store_true", help="Import passes from CSV file")
     parser_admin.add_argument("--source", help="CSV file source for pass records (required for --addpasses)")
     parser_admin.set_defaults(func=admin)
 
     args = parser.parse_args()
     args.func(args)
-
 
 if __name__ == "__main__":
     main()
