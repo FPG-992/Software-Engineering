@@ -6,3 +6,7 @@ deactivate
 sudo rm /usr/local/bin/se2401
 chmod +x main.py
 sudo ln -s "$(pwd)/main.py" /usr/local/bin/se2401
+
+run_commands.sh
+chmod +x run_commands.sh
+./run_commands.sh

@@ -1,5 +1,3 @@
-se2401 logout
-se2401 login --username [your username] --passw [your password]
 se2401 healthcheck
 se2401 resetpasses
 se2401 healthcheck
