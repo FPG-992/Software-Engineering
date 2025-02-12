@@ -1,0 +1,1179 @@
+{
+	"info": {
+		"_postman_id": "de17e07f-0d03-48ef-9c00-9ce7174a9116",
+		"name": "Toll API",
+		"description": "REST API για το σύστημα tollOperations, σύμφωνα με το πρότυπο OpenAPI 3.0 (JSON)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41966389"
+	},
+	"item": [
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "healthcheck",
+					"item": [
+						{
+							"name": "Έλεγχος λειτουργίας (healthcheck)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/admin/healthcheck",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"admin",
+										"healthcheck"
+									]
+								},
+								"description": "Επιστρέφει την κατάσταση της βάσης δεδομένων και τις μετρήσεις για σταθμούς, tags και passes."
+							},
+							"response": [
+								{
+									"name": "Επιτυχής απόκριση με πληροφορίες υγείας.",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "http://localhost:3000/api/admin/healthcheck",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"admin",
+												"healthcheck"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\",\n  \"dbconnection\": \"<string>\",\n  \"n_stations\": \"<integer>\",\n  \"n_tags\": \"<integer>\",\n  \"n_passes\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Αποτυχία λόγω προβλήματος στη σύνδεση της βάσης δεδομένων.",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/admin/healthcheck",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin",
+												"healthcheck"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\",\n  \"dbconnection\": \"<string>\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "resetstations",
+					"item": [
+						{
+							"name": "Επαναφορά σταθμών",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/admin/resetstations",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"admin",
+										"resetstations"
+									]
+								},
+								"description": "Ανακτά δεδομένα σταθμών από τοπικό CSV αρχείο και επαναπληθύνει τη βάση."
+							},
+							"response": [
+								{
+									"name": "Επιτυχής επαναφορά σταθμών.",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "http://localhost:3000/api/admin/resetstations",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"admin",
+												"resetstations"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\"\n}"
+								},
+								{
+									"name": "Εσωτερικό σφάλμα διακομιστή",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "http://localhost:3000/api/admin/resetstations",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"admin",
+												"resetstations"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\",\n  \"info\": \"<string>\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "resetpasses",
+					"item": [
+						{
+							"name": "Επαναφορά passes",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/admin/resetpasses",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"admin",
+										"resetpasses"
+									]
+								},
+								"description": "Διαγράφει όλα τα passes (αφαιρώντας αναφορές σε μη υπάρχοντα tag models)."
+							},
+							"response": [
+								{
+									"name": "Επιτυχής διαγραφή passes.",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "http://localhost:3000/api/admin/resetpasses",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"admin",
+												"resetpasses"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\"\n}"
+								},
+								{
+									"name": "Εσωτερικό σφάλμα διακομιστή",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/admin/resetpasses",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin",
+												"resetpasses"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\",\n  \"info\": \"<string>\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "addpasses",
+					"item": [
+						{
+							"name": "Προσθήκη passes μέσω CSV",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "multipart/form-data"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"description": "(Required) CSV αρχείο (MIME type text/csv)",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/addpasses",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"admin",
+										"addpasses"
+									]
+								},
+								"description": "Ανεβάζει αρχείο CSV (μέσω multipart/form-data) για εισαγωγή passes."
+							},
+							"response": [
+								{
+									"name": "Passes προστέθηκαν επιτυχώς.",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "multipart/form-data"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "file",
+													"description": "(Required) CSV αρχείο (MIME type text/csv)",
+													"type": "file",
+													"src": []
+												}
+											]
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/admin/addpasses",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"admin",
+												"addpasses"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\"\n}"
+								},
+								{
+									"name": "Λανθασμένο αίτημα (π.χ. αρχείο λείπει ή έχει λάθος τύπο).",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "multipart/form-data"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "file",
+													"description": "(Required) CSV αρχείο (MIME type text/csv)",
+													"type": "file",
+													"src": []
+												}
+											]
+										},
+										"url": {
+											"raw": "{{baseUrl}}/admin/addpasses",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin",
+												"addpasses"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\",\n  \"info\": \"<string>\"\n}"
+								},
+								{
+									"name": "Εσωτερικό σφάλμα διακομιστή",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "multipart/form-data"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "file",
+													"description": "(Required) CSV αρχείο (MIME type text/csv)",
+													"type": "file",
+													"src": []
+												}
+											]
+										},
+										"url": {
+											"raw": "{{baseUrl}}/admin/addpasses",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin",
+												"addpasses"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"status\": \"<string>\",\n  \"info\": \"<string>\"\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "chargesBy",
+			"item": [
+				{
+					"name": "{tollOpID}",
+					"item": [
+						{
+							"name": "{date_from}",
+							"item": [
+								{
+									"name": "{date_to}",
+									"item": [
+										{
+											"name": "Επιστροφή χρεώσεων από Toll Operator",
+											"request": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/chargesBy/:tollOpID/:date_from/:date_to?format=json",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"chargesBy",
+														":tollOpID",
+														":date_from",
+														":date_to"
+													],
+													"query": [
+														{
+															"key": "format",
+															"value": "json",
+															"description": "Μορφή απόκρισης (csv ή json)."
+														}
+													],
+													"variable": [
+														{
+															"key": "tollOpID",
+															"value": "<string>",
+															"description": "(Required) ID του Toll Operator"
+														},
+														{
+															"key": "date_from",
+															"value": "00540737",
+															"description": "(Required) Ημερομηνία έναρξης (μορφή: yyyyMMdd)"
+														},
+														{
+															"key": "date_to",
+															"value": "00540737",
+															"description": "(Required) Ημερομηνία λήξης (μορφή: yyyyMMdd)"
+														}
+													]
+												},
+												"description": "Επιστρέφει πληροφορίες χρεώσεων για τον συγκεκριμένο toll operator σε δεδομένο χρονικό διάστημα."
+											},
+											"response": [
+												{
+													"name": "Επιτυχής απόκριση με δεδομένα χρεώσεων.",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "http://localhost:3000/api/chargesBy/:tollOpID/:date_from/:date_to?format=json",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "3000",
+															"path": [
+																"api",
+																"chargesBy",
+																":tollOpID",
+																":date_from",
+																":date_to"
+															],
+															"query": [
+																{
+																	"key": "format",
+																	"value": "json",
+																	"description": "Μορφή απόκρισης (csv ή json)."
+																}
+															],
+															"variable": [
+																{
+																	"key": "tollOpID"
+																},
+																{
+																	"key": "date_from"
+																},
+																{
+																	"key": "date_to"
+																}
+															]
+														}
+													},
+													"status": "OK",
+													"code": 200,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"tollOpID\": \"<string>\",\n  \"requestTimestamp\": \"<string>\",\n  \"periodFrom\": \"<string>\",\n  \"periodTo\": \"<string>\",\n  \"vOpList\": [\n    {\n      \"visitingOpID\": \"<string>\",\n      \"nPasses\": \"<integer>\",\n      \"passesCost\": \"<string>\"\n    },\n    {\n      \"visitingOpID\": \"<string>\",\n      \"nPasses\": \"<integer>\",\n      \"passesCost\": \"<string>\"\n    }\n  ]\n}"
+												},
+												{
+													"name": "Μη έγκυρη μορφή ημερομηνίας.",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "{{baseUrl}}/chargesBy/:tollOpID/:date_from/:date_to?format=json",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"chargesBy",
+																":tollOpID",
+																":date_from",
+																":date_to"
+															],
+															"query": [
+																{
+																	"key": "format",
+																	"value": "json",
+																	"description": "Μορφή απόκρισης (csv ή json)."
+																}
+															],
+															"variable": [
+																{
+																	"key": "tollOpID"
+																},
+																{
+																	"key": "date_from"
+																},
+																{
+																	"key": "date_to"
+																}
+															]
+														}
+													},
+													"status": "Bad Request",
+													"code": 400,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"status\": \"<string>\",\n  \"reason\": \"<string>\"\n}"
+												},
+												{
+													"name": "Εσωτερικό σφάλμα διακομιστή",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "{{baseUrl}}/chargesBy/:tollOpID/:date_from/:date_to?format=json",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"chargesBy",
+																":tollOpID",
+																":date_from",
+																":date_to"
+															],
+															"query": [
+																{
+																	"key": "format",
+																	"value": "json",
+																	"description": "Μορφή απόκρισης (csv ή json)."
+																}
+															],
+															"variable": [
+																{
+																	"key": "tollOpID"
+																},
+																{
+																	"key": "date_from"
+																},
+																{
+																	"key": "date_to"
+																}
+															]
+														}
+													},
+													"status": "Internal Server Error",
+													"code": 500,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"status\": \"<string>\",\n  \"info\": \"<string>\"\n}"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "passesCost",
+			"item": [
+				{
+					"name": "{tollOpID}",
+					"item": [
+						{
+							"name": "{tagOpID}",
+							"item": [
+								{
+									"name": "{date_from}",
+									"item": [
+										{
+											"name": "{date_to}",
+											"item": [
+												{
+													"name": "Επιστροφή Passes και Κόστους",
+													"request": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "{{baseUrl}}/passesCost/:tollOpID/:tagOpID/:date_from/:date_to?format=json",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"passesCost",
+																":tollOpID",
+																":tagOpID",
+																":date_from",
+																":date_to"
+															],
+															"query": [
+																{
+																	"key": "format",
+																	"value": "json",
+																	"description": "Μορφή απόκρισης (csv ή json)."
+																}
+															],
+															"variable": [
+																{
+																	"key": "tollOpID",
+																	"value": "<string>",
+																	"description": "(Required) ID του Toll Operator"
+																},
+																{
+																	"key": "tagOpID",
+																	"value": "<string>",
+																	"description": "(Required) ID του Tag Operator"
+																},
+																{
+																	"key": "date_from",
+																	"value": "00540737",
+																	"description": "(Required) Ημερομηνία έναρξης (μορφή: yyyyMMdd)"
+																},
+																{
+																	"key": "date_to",
+																	"value": "00540737",
+																	"description": "(Required) Ημερομηνία λήξης (μορφή: yyyyMMdd)"
+																}
+															]
+														},
+														"description": "Επιστρέφει τον αριθμό των passes και το συνολικό κόστος για δεδομένο toll operator και tag operator σε χρονικό διάστημα."
+													},
+													"response": [
+														{
+															"name": "Επιτυχής απόκριση με δεδομένα passes και κόστους.",
+															"originalRequest": {
+																"method": "GET",
+																"header": [
+																	{
+																		"key": "Accept",
+																		"value": "application/json"
+																	}
+																],
+																"url": {
+																	"raw": "http://localhost:3000/api/passesCost/:tollOpID/:tagOpID/:date_from/:date_to?format=json",
+																	"protocol": "http",
+																	"host": [
+																		"localhost"
+																	],
+																	"port": "3000",
+																	"path": [
+																		"api",
+																		"passesCost",
+																		":tollOpID",
+																		":tagOpID",
+																		":date_from",
+																		":date_to"
+																	],
+																	"query": [
+																		{
+																			"key": "format",
+																			"value": "json",
+																			"description": "Μορφή απόκρισης (csv ή json)."
+																		}
+																	],
+																	"variable": [
+																		{
+																			"key": "tollOpID"
+																		},
+																		{
+																			"key": "tagOpID"
+																		},
+																		{
+																			"key": "date_from"
+																		},
+																		{
+																			"key": "date_to"
+																		}
+																	]
+																}
+															},
+															"status": "OK",
+															"code": 200,
+															"_postman_previewlanguage": "json",
+															"header": [
+																{
+																	"key": "Content-Type",
+																	"value": "application/json"
+																}
+															],
+															"cookie": [],
+															"body": "{\n  \"tollOpID\": \"<string>\",\n  \"tagOpID\": \"<string>\",\n  \"requestTimestamp\": \"<string>\",\n  \"periodFrom\": \"<string>\",\n  \"periodTo\": \"<string>\",\n  \"nPasses\": \"<integer>\",\n  \"passesCost\": \"<string>\"\n}"
+														},
+														{
+															"name": "Εσωτερικό σφάλμα διακομιστή",
+															"originalRequest": {
+																"method": "GET",
+																"header": [
+																	{
+																		"key": "Accept",
+																		"value": "application/json"
+																	}
+																],
+																"url": {
+																	"raw": "{{baseUrl}}/passesCost/:tollOpID/:tagOpID/:date_from/:date_to?format=json",
+																	"host": [
+																		"{{baseUrl}}"
+																	],
+																	"path": [
+																		"passesCost",
+																		":tollOpID",
+																		":tagOpID",
+																		":date_from",
+																		":date_to"
+																	],
+																	"query": [
+																		{
+																			"key": "format",
+																			"value": "json",
+																			"description": "Μορφή απόκρισης (csv ή json)."
+																		}
+																	],
+																	"variable": [
+																		{
+																			"key": "tollOpID"
+																		},
+																		{
+																			"key": "tagOpID"
+																		},
+																		{
+																			"key": "date_from"
+																		},
+																		{
+																			"key": "date_to"
+																		}
+																	]
+																}
+															},
+															"status": "Internal Server Error",
+															"code": 500,
+															"_postman_previewlanguage": "json",
+															"header": [
+																{
+																	"key": "Content-Type",
+																	"value": "application/json"
+																}
+															],
+															"cookie": [],
+															"body": "{\n  \"status\": \"<string>\",\n  \"info\": \"<string>\"\n}"
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "tollStationPasses",
+			"item": [
+				{
+					"name": "{tollStationID}",
+					"item": [
+						{
+							"name": "{date_from}",
+							"item": [
+								{
+									"name": "{date_to}",
+									"item": [
+										{
+											"name": "Επιστροφή Passes για σταθμό",
+											"request": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/tollStationPasses/:tollStationID/:date_from/:date_to?format=json",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"tollStationPasses",
+														":tollStationID",
+														":date_from",
+														":date_to"
+													],
+													"query": [
+														{
+															"key": "format",
+															"value": "json",
+															"description": "Μορφή απόκρισης (csv ή json)."
+														}
+													],
+													"variable": [
+														{
+															"key": "tollStationID",
+															"value": "<string>",
+															"description": "(Required) ID του Toll Station"
+														},
+														{
+															"key": "date_from",
+															"value": "00540737",
+															"description": "(Required) Ημερομηνία έναρξης (μορφή: yyyyMMdd)"
+														},
+														{
+															"key": "date_to",
+															"value": "00540737",
+															"description": "(Required) Ημερομηνία λήξης (μορφή: yyyyMMdd)"
+														}
+													]
+												},
+												"description": "Επιστρέφει πληροφορίες για τον σταθμό (ID, Operator) καθώς και τη λίστα των passes σε δεδομένο χρονικό διάστημα."
+											},
+											"response": [
+												{
+													"name": "Επιτυχής απόκριση με δεδομένα του σταθμού και τα passes.",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "http://localhost:3000/api/tollStationPasses/:tollStationID/:date_from/:date_to?format=json",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "3000",
+															"path": [
+																"api",
+																"tollStationPasses",
+																":tollStationID",
+																":date_from",
+																":date_to"
+															],
+															"query": [
+																{
+																	"key": "format",
+																	"value": "json",
+																	"description": "Μορφή απόκρισης (csv ή json)."
+																}
+															],
+															"variable": [
+																{
+																	"key": "tollStationID"
+																},
+																{
+																	"key": "date_from"
+																},
+																{
+																	"key": "date_to"
+																}
+															]
+														}
+													},
+													"status": "OK",
+													"code": 200,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"stationID\": \"<string>\",\n  \"stationOperator\": \"<string>\",\n  \"requestTimestamp\": \"<string>\",\n  \"periodFrom\": \"<string>\",\n  \"periodTo\": \"<string>\",\n  \"nPasses\": \"<integer>\",\n  \"passList\": [\n    {\n      \"timestamp\": \"<string>\",\n      \"passCharge\": \"<string>\"\n    },\n    {\n      \"timestamp\": \"<string>\",\n      \"passCharge\": \"<string>\"\n    }\n  ]\n}"
+												},
+												{
+													"name": "Δεν βρέθηκε ο σταθμός.",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "{{baseUrl}}/tollStationPasses/:tollStationID/:date_from/:date_to?format=json",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"tollStationPasses",
+																":tollStationID",
+																":date_from",
+																":date_to"
+															],
+															"query": [
+																{
+																	"key": "format",
+																	"value": "json",
+																	"description": "Μορφή απόκρισης (csv ή json)."
+																}
+															],
+															"variable": [
+																{
+																	"key": "tollStationID"
+																},
+																{
+																	"key": "date_from"
+																},
+																{
+																	"key": "date_to"
+																}
+															]
+														}
+													},
+													"status": "Not Found",
+													"code": 404,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"status\": \"<string>\",\n  \"reason\": \"<string>\"\n}"
+												},
+												{
+													"name": "Εσωτερικό σφάλμα διακομιστή",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "{{baseUrl}}/tollStationPasses/:tollStationID/:date_from/:date_to?format=json",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"tollStationPasses",
+																":tollStationID",
+																":date_from",
+																":date_to"
+															],
+															"query": [
+																{
+																	"key": "format",
+																	"value": "json",
+																	"description": "Μορφή απόκρισης (csv ή json)."
+																}
+															],
+															"variable": [
+																{
+																	"key": "tollStationID"
+																},
+																{
+																	"key": "date_from"
+																},
+																{
+																	"key": "date_to"
+																}
+															]
+														}
+													},
+													"status": "Internal Server Error",
+													"code": 500,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"status\": \"<string>\",\n  \"info\": \"<string>\"\n}"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api"
+		}
+	]
+}
