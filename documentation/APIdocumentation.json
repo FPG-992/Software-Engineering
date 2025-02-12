@@ -1,0 +1,514 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Toll API",
+      "version": "1.0.0",
+      "description": "REST API για το σύστημα tol, σύμφωνα με το πρότυπο OpenAPI 3.0 (JSON)."
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000/api",
+        "description": "Τοπικός διακομιστής"
+      }
+    ],
+    "paths": {
+      "/admin/healthcheck": {
+        "get": {
+          "tags": ["Admin"],
+          "summary": "Έλεγχος λειτουργίας (healthcheck)",
+          "description": "Επιστρέφει την κατάσταση της βάσης δεδομένων και τις μετρήσεις για σταθμούς, tags και passes.",
+          "responses": {
+            "200": {
+              "description": "Επιτυχής απόκριση με πληροφορίες υγείας.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HealthCheckResponse"
+                  },
+                  "examples": {
+                    "success": {
+                      "value": {
+                        "status": "OK",
+                        "dbconnection": "postgres://user:pass@host:port/db",
+                        "n_stations": 10,
+                        "n_tags": 100,
+                        "n_passes": 1000
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Αποτυχία λόγω προβλήματος στη σύνδεση της βάσης δεδομένων.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "failed"
+                      },
+                      "dbconnection": {
+                        "type": "string",
+                        "example": "postgres://user:pass@host:port/db"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/resetstations": {
+        "post": {
+          "tags": ["Admin"],
+          "summary": "Επαναφορά σταθμών",
+          "description": "Ανακτά δεδομένα σταθμών από τοπικό CSV αρχείο και επαναπληθύνει τη βάση.",
+          "responses": {
+            "200": {
+              "description": "Επιτυχής επαναφορά σταθμών.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "OK"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          }
+        }
+      },
+      "/admin/resetpasses": {
+        "post": {
+          "tags": ["Admin"],
+          "summary": "Επαναφορά passes",
+          "description": "Διαγράφει όλα τα passes (αφαιρώντας αναφορές σε μη υπάρχοντα tag models).",
+          "responses": {
+            "200": {
+              "description": "Επιτυχής διαγραφή passes.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "OK"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          }
+        }
+      },
+      "/admin/addpasses": {
+        "post": {
+          "tags": ["Admin"],
+          "summary": "Προσθήκη passes μέσω CSV",
+          "description": "Ανεβάζει αρχείο CSV (μέσω multipart/form-data) για εισαγωγή passes.",
+          "requestBody": {
+            "$ref": "#/components/requestBodies/AddPassesRequest"
+          },
+          "responses": {
+            "200": {
+              "description": "Passes προστέθηκαν επιτυχώς.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "OK"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Λανθασμένο αίτημα (π.χ. αρχείο λείπει ή έχει λάθος τύπο).",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "failed"
+                      },
+                      "info": {
+                        "type": "string",
+                        "example": "No file uploaded"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          }
+        }
+      },
+      "/chargesBy/{tollOpID}/{date_from}/{date_to}": {
+        "get": {
+          "tags": ["ChargesBy"],
+          "summary": "Επιστροφή χρεώσεων από Toll Operator",
+          "description": "Επιστρέφει πληροφορίες χρεώσεων για τον συγκεκριμένο toll operator σε δεδομένο χρονικό διάστημα.",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/tollOpID"
+            },
+            {
+              "$ref": "#/components/parameters/date_from"
+            },
+            {
+              "$ref": "#/components/parameters/date_to"
+            },
+            {
+              "name": "format",
+              "in": "query",
+              "description": "Μορφή απόκρισης (csv ή json).",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["csv", "json"],
+                "default": "json"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Επιτυχής απόκριση με δεδομένα χρεώσεων.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "tollOpID": { "type": "string", "example": "OP123" },
+                      "requestTimestamp": { "type": "string", "example": "2024-01-01T12:00:00Z" },
+                      "periodFrom": { "type": "string", "example": "20240101" },
+                      "periodTo": { "type": "string", "example": "20240131" },
+                      "vOpList": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "visitingOpID": { "type": "string", "example": "OP456" },
+                            "nPasses": { "type": "integer", "example": 10 },
+                            "passesCost": { "type": "string", "example": "100.00" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "text/csv": {
+                  "schema": {
+                    "type": "string",
+                    "example": "tollOpID,requestTimestamp,periodFrom,periodTo,vOpList.visitingOpID,vOpList.nPasses,vOpList.passesCost\nOP123,2024-01-01T12:00:00Z,20240101,20240131,OP456,10,100.00"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Μη έγκυρη μορφή ημερομηνίας.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "failed" },
+                      "reason": {
+                        "type": "string",
+                        "example": "Invalid date format, expected: yyyyMMdd"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          }
+        }
+      },
+      "/passesCost/{tollOpID}/{tagOpID}/{date_from}/{date_to}": {
+        "get": {
+          "tags": ["PassesCost"],
+          "summary": "Επιστροφή Passes και Κόστους",
+          "description": "Επιστρέφει τον αριθμό των passes και το συνολικό κόστος για δεδομένο toll operator και tag operator σε χρονικό διάστημα.",
+          "parameters": [
+            { "$ref": "#/components/parameters/tollOpID" },
+            { "$ref": "#/components/parameters/tagOpID" },
+            { "$ref": "#/components/parameters/date_from" },
+            { "$ref": "#/components/parameters/date_to" },
+            {
+              "name": "format",
+              "in": "query",
+              "description": "Μορφή απόκρισης (csv ή json).",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["csv", "json"],
+                "default": "json"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Επιτυχής απόκριση με δεδομένα passes και κόστους.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "tollOpID": { "type": "string", "example": "OP123" },
+                      "tagOpID": { "type": "string", "example": "TAG456" },
+                      "requestTimestamp": { "type": "string", "example": "2024-01-01T12:00:00Z" },
+                      "periodFrom": { "type": "string", "example": "20240101" },
+                      "periodTo": { "type": "string", "example": "20240131" },
+                      "nPasses": { "type": "integer", "example": 50 },
+                      "passesCost": { "type": "string", "example": "500.00" }
+                    }
+                  }
+                },
+                "text/csv": {
+                  "schema": {
+                    "type": "string",
+                    "example": "tollOpID,tagOpID,requestTimestamp,periodFrom,periodTo,nPasses,passesCost\nOP123,TAG456,2024-01-01T12:00:00Z,20240101,20240131,50,500.00"
+                  }
+                }
+              }
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          }
+        }
+      },
+      "/tollStationPasses/{tollStationID}/{date_from}/{date_to}": {
+        "get": {
+          "tags": ["TollStationPasses"],
+          "summary": "Επιστροφή Passes για σταθμό",
+          "description": "Επιστρέφει πληροφορίες για τον σταθμό (ID, Operator) καθώς και τη λίστα των passes σε δεδομένο χρονικό διάστημα.",
+          "parameters": [
+            { "$ref": "#/components/parameters/tollStationID" },
+            { "$ref": "#/components/parameters/date_from" },
+            { "$ref": "#/components/parameters/date_to" },
+            {
+              "name": "format",
+              "in": "query",
+              "description": "Μορφή απόκρισης (csv ή json).",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": ["csv", "json"],
+                "default": "json"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Επιτυχής απόκριση με δεδομένα του σταθμού και τα passes.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "stationID": { "type": "string", "example": "TS001" },
+                      "stationOperator": { "type": "string", "example": "OperatorName" },
+                      "requestTimestamp": { "type": "string", "example": "2024-01-01T12:00:00Z" },
+                      "periodFrom": { "type": "string", "example": "20240101" },
+                      "periodTo": { "type": "string", "example": "20240131" },
+                      "nPasses": { "type": "integer", "example": 20 },
+                      "passList": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "timestamp": { "type": "string", "example": "2024-01-15T08:30:00Z" },
+                            "passCharge": { "type": "string", "example": "15.00" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "text/csv": {
+                  "schema": {
+                    "type": "string",
+                    "example": "stationID,stationOperator,requestTimestamp,periodFrom,periodTo,passList.timestamp,passList.passCharge\nTS001,OperatorName,2024-01-01T12:00:00Z,20240101,20240131,2024-01-15T08:30:00Z,15.00"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Δεν βρέθηκε ο σταθμός.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "failed" },
+                      "reason": { "type": "string", "example": "Toll station not found" }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "parameters": {
+        "tollOpID": {
+          "name": "tollOpID",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "ID του Toll Operator"
+        },
+        "tagOpID": {
+          "name": "tagOpID",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "ID του Tag Operator"
+        },
+        "tollStationID": {
+          "name": "tollStationID",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "ID του Toll Station"
+        },
+        "date_from": {
+          "name": "date_from",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]{8}$"
+          },
+          "description": "Ημερομηνία έναρξης (μορφή: yyyyMMdd)"
+        },
+        "date_to": {
+          "name": "date_to",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]{8}$"
+          },
+          "description": "Ημερομηνία λήξης (μορφή: yyyyMMdd)"
+        }
+      },
+      "requestBodies": {
+        "AddPassesRequest": {
+          "description": "Αρχείο CSV για προσθήκη passes",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "CSV αρχείο (MIME type text/csv)"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "BadRequest": {
+          "description": "Λανθασμένο αίτημα",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string" },
+                  "info": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "ServerError": {
+          "description": "Εσωτερικό σφάλμα διακομιστή",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "example": "failed" },
+                  "info": { "type": "string", "example": "Unknown internal server error" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "schemas": {
+        "HealthCheckResponse": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string" },
+            "dbconnection": { "type": "string" },
+            "n_stations": { "type": "integer" },
+            "n_tags": { "type": "integer" },
+            "n_passes": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "Admin",
+        "description": "Διαχειριστικά endpoints"
+      },
+      {
+        "name": "ChargesBy",
+        "description": "Endpoints για τις χρεώσεις ανά Toll Operator"
+      },
+      {
+        "name": "PassesCost",
+        "description": "Endpoints για το κόστος των passes"
+      },
+      {
+        "name": "TollStationPasses",
+        "description": "Endpoints για τα passes ενός σταθμού"
+      }
+    ]
+  }
+  
