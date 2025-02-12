@@ -3,7 +3,7 @@
     "info": {
       "title": "Toll API",
       "version": "1.0.0",
-      "description": "REST API για το σύστημα tol, σύμφωνα με το πρότυπο OpenAPI 3.0 (JSON)."
+      "description": "REST API για το σύστημα toll operations, σύμφωνα με το πρότυπο OpenAPI 3.0 (JSON)."
     },
     "servers": [
       {
